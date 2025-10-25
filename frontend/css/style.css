@@ -1,0 +1,113 @@
+body {
+    font-family: system-ui, sans-serif;
+    background-color: #fffbe6;
+    margin: 0;
+    padding: 0;
+  }
+  
+  header {
+    background: #ffda79;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  header h1 {
+    margin: 0;
+    font-size: 20px;
+  }
+  
+  #searchInput {
+    padding: 6px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+  
+  #logoutBtn {
+    background: #ffda79;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  #logoutBtn:hover {
+    background: #ffcd45;
+  }
+  
+  #noteForm {
+    padding: 15px;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  #noteTitle {
+    font-size: 16px;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  
+  #noteContent {
+    height: 100px;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    resize: vertical;
+  }
+  
+  #saveNote {
+    align-self: flex-start;
+    background: #ffda79;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  #saveNote:hover {
+    background: #ffcd45;
+  }
+  
+  #noteList {
+    padding: 15px;
+  }
+  
+  .note {
+    background: #fffef2;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    transition: transform 0.1s;
+  }
+  
+  .note:hover {
+    transform: scale(1.01);
+  }
+  
+  .note h3 {
+    margin: 0 0 6px 0;
+  }
+  
+  .note button {
+    background: #ffd43b;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    margin-right: 5px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .note button:hover {
+    background: #ffcd45;
+  }
+  
