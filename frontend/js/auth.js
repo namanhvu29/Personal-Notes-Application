@@ -1,32 +1,3 @@
-// const users = [
-//     { username: 'admin', password: '123', role: 'admin' },
-//     { username: 'user', password: '123', role: 'user' }
-//   ];
-  
-//   const form = document.getElementById('loginForm');
-//   if (form) {
-//     form.addEventListener('submit', e => {
-//       e.preventDefault();
-//       const username = document.getElementById('username').value;
-//       const password = document.getElementById('password').value;
-//       const user = users.find(u => u.username === username && u.password === password);
-//       if (!user) return document.getElementById('errorMsg').innerText = 'Sai thông tin đăng nhập';
-//       localStorage.setItem('currentUser', JSON.stringify(user));
-//       window.location.href = user.role === 'admin' ? 'admin.html' : 'index.html';
-//     });
-//   }
-  
-//   // kiểm tra đăng nhập ở các trang khác
-//   const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-//   if (currentUser && !window.location.href.includes('login.html')) {
-//     const logoutBtn = document.getElementById('logoutBtn');
-//     if (logoutBtn) logoutBtn.onclick = () => {
-//       localStorage.removeItem('currentUser');
-//       window.location.href = 'login.html';
-//     };
-//   }
-// ---- QUẢN LÝ NGƯỜI DÙNG ----
-
 // Khởi tạo danh sách người dùng mặc định
 let defaultUsers = [
   { username: 'admin', password: '123', role: 'admin' },
@@ -66,6 +37,12 @@ if (registerForm) {
 
     if (!newUsername || !newPassword || !confirmPassword)
       return registerMsg.innerText = 'Vui lòng nhập đầy đủ thông tin';
+    
+    // Ràng buộc mật khẩu: Tối thiểu 8 ký tự, gồm cả chữ hoa, chữ thường và số
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    if (!passwordRegex.test(newPassword))
+      return registerMsg.innerText = 'Mật khẩu phải tối thiểu 8 ký tự, gồm chữ hoa, chữ thường và số';
+    
     if (newPassword !== confirmPassword)
       return registerMsg.innerText = 'Mật khẩu xác nhận không khớp';
 
