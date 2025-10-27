@@ -1,23 +1,30 @@
 // Khởi tạo danh sách người dùng mặc định
 let defaultUsers = [
-  { username: 'admin', password: '123', role: 'admin' },
-  { username: 'user', password: '123', role: 'user' }
+  { username: 'admin', email: 'admin@gmail.com', password: '123', role: 'admin' },
+  { username: 'user', email: 'user@gmail.com', password: '123', role: 'user' }
 ];
 
 // Lấy danh sách user trong localStorage hoặc dùng mặc định
 let users = JSON.parse(localStorage.getItem('users')) || defaultUsers;
-localStorage.setItem('users', JSON.stringify(users));
+
+// Chỉ ghi lại vào localStorage nếu đang dùng mặc định ban đầu HOẶC cần cập nhật cấu trúc
+if (!localStorage.getItem('users')) {
+  localStorage.setItem('users', JSON.stringify(users));
+}
 
 // ---- XỬ LÝ ĐĂNG NHẬP ----
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
   loginForm.addEventListener('submit', e => {
     e.preventDefault();
-    const username = document.getElementById('username').value.trim();
+    const usernameOrEmail = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value.trim();
     const users = JSON.parse(localStorage.getItem('users')) || [];
-    const user = users.find(u => u.username === username && u.password === password);
     
+    // Tìm người dùng qua username hoặc email
+    const user = users.find(u => 
+      (u.username === usernameOrEmail || u.email === usernameOrEmail) && u.password === password);
+
     if (!user) return document.getElementById('errorMsg').innerText = 'Sai thông tin đăng nhập';
     
     localStorage.setItem('currentUser', JSON.stringify(user));
@@ -31,26 +38,31 @@ if (registerForm) {
   registerForm.addEventListener('submit', e => {
     e.preventDefault();
     const newUsername = document.getElementById('newUsername').value.trim();
+    const newEmail = document.getElementById('newEmail').value.trim(); // Lấy giá trị Email
     const newPassword = document.getElementById('newPassword').value.trim();
     const confirmPassword = document.getElementById('confirmPassword').value.trim();
     const registerMsg = document.getElementById('registerMsg');
 
-    if (!newUsername || !newPassword || !confirmPassword)
+    if (!newUsername || !newEmail || !newPassword || !confirmPassword)
       return registerMsg.innerText = 'Vui lòng nhập đầy đủ thông tin';
     
     // Ràng buộc mật khẩu: Tối thiểu 8 ký tự, gồm cả chữ hoa, chữ thường và số
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    
     if (!passwordRegex.test(newPassword))
       return registerMsg.innerText = 'Mật khẩu phải tối thiểu 8 ký tự, gồm chữ hoa, chữ thường và số';
-    
+
     if (newPassword !== confirmPassword)
       return registerMsg.innerText = 'Mật khẩu xác nhận không khớp';
 
     const users = JSON.parse(localStorage.getItem('users')) || [];
-    const exists = users.some(u => u.username === newUsername);
-    if (exists) return registerMsg.innerText = 'Tên đăng nhập đã tồn tại';
+    
+    // Kiểm tra tên đăng nhập hoặc email đã tồn tại
+    const exists = users.some(u => u.username === newUsername || u.email === newEmail);
+    if (exists) return registerMsg.innerText = 'Tên đăng nhập hoặc Email đã tồn tại';
 
-    users.push({ username: newUsername, password: newPassword, role: 'user' });
+    // Thêm email vào đối tượng người dùng mới
+    users.push({ username: newUsername, email: newEmail, password: newPassword, role: 'user' });
     localStorage.setItem('users', JSON.stringify(users));
     registerMsg.style.color = 'green';
     registerMsg.innerText = 'Đăng ký thành công! Chuyển hướng...';
