@@ -1,55 +1,134 @@
-const titleInput = document.getElementById('noteTitle');
-const contentInput = document.getElementById('noteContent');
-const saveBtn = document.getElementById('saveNote');
-const listContainer = document.getElementById('noteList');
-const searchInput = document.getElementById('searchInput');
+// ===================== Element references =====================
+const addNoteBtn = document.getElementById("addNoteBtn");
+const notesList = document.getElementById("notesList");
+const noteTitle = document.getElementById("noteTitle");
+const noteContent = document.getElementById("noteContent");
+const starBtn = document.getElementById("starBtn");
+const deleteBtn = document.getElementById("deleteBtn");
+const saveStatus = document.getElementById("saveStatus");
 
-let notes = JSON.parse(localStorage.getItem('notes') || '[]');
+// Menu buttons
+const menuBtn = document.querySelector(".menu-btn");
+const dropdown = document.querySelector(".dropdown-content");
+const settingsBtn = document.querySelector(".settings-btn");
+const settingsMenu = document.querySelector(".settings-menu");
 
-function renderNotes(filter = '') {
-  listContainer.innerHTML = '';
-  const filtered = notes.filter(n => 
-    n.title.toLowerCase().includes(filter.toLowerCase()) ||
-    n.content.toLowerCase().includes(filter.toLowerCase())
-  );
-  filtered.forEach((note, i) => {
-    const div = document.createElement('div');
-    div.className = 'note';
-    div.innerHTML = `
-      <h3>${note.title}</h3>
-      <p>${note.content}</p>
-      <button onclick="editNote(${i})">Sửa</button>
-      <button onclick="deleteNote(${i})">Xóa</button>
-    `;
-    listContainer.appendChild(div);
+// ===================== Notes logic =====================
+let notes = JSON.parse(localStorage.getItem("notes") || "[]");
+let currentIndex = null;
+let saveTimeout = null;
+
+// --- Render danh sách notes ---
+function renderNotes() {
+  notesList.innerHTML = "";
+  notes.forEach((note, index) => {
+    const li = document.createElement("li");
+    li.textContent = note.title || "Untitled";
+    if (note.important) li.classList.add("important");
+    li.addEventListener("click", () => openNote(index));
+    notesList.appendChild(li);
   });
 }
 
-function saveNote() {
-  const title = titleInput.value.trim();
-  const content = contentInput.value.trim();
-  if (!title || !content) return alert('Nhập tiêu đề và nội dung');
-  notes.push({ title, content });
-  localStorage.setItem('notes', JSON.stringify(notes));
-  renderNotes();
-  titleInput.value = '';
-  contentInput.value = '';
-}
-
-function editNote(index) {
+// --- Mở note ---
+function openNote(index) {
+  currentIndex = index;
   const note = notes[index];
-  titleInput.value = note.title;
-  contentInput.value = note.content;
-  deleteNote(index);
+  noteTitle.value = note.title;
+  noteContent.value = note.content;
+  starBtn.classList.toggle("active", note.important);
+  updateSaveStatus("saved");
 }
 
-function deleteNote(index) {
-  notes.splice(index, 1);
-  localStorage.setItem('notes', JSON.stringify(notes));
-  renderNotes(searchInput.value);
+// --- Tạo note ---
+function createNote() {
+  const newNote = { title: "", content: "", important: false };
+  notes.push(newNote);
+  currentIndex = notes.length - 1;
+  localStorage.setItem("notes", JSON.stringify(notes));
+  renderNotes();
+  openNote(currentIndex);
+  noteTitle.focus();
 }
 
-saveBtn.addEventListener('click', saveNote);
-searchInput.addEventListener('input', e => renderNotes(e.target.value));
+// --- Auto save (hiện "Saving..." → "Saved") ---
+function autoSave() {
+  if (currentIndex === null) createNote();
+  const note = notes[currentIndex];
+  note.title = noteTitle.value;
+  note.content = noteContent.value;
 
+  updateSaveStatus("saving");
+
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    localStorage.setItem("notes", JSON.stringify(notes));
+    renderNotes();
+    updateSaveStatus("saved");
+  }, 800);
+}
+
+// --- Delete note ---
+function deleteNote() {
+  if (currentIndex === null) return alert("Không có note nào được chọn!");
+  if (!confirm("Bạn có chắc muốn xóa ghi chú này không?")) return;
+
+  notes.splice(currentIndex, 1);
+  localStorage.setItem("notes", JSON.stringify(notes));
+  currentIndex = null;
+
+  noteTitle.value = "";
+  noteContent.value = "";
+  updateSaveStatus("saved");
+  renderNotes();
+}
+
+// --- Mark important ---
+function toggleImportant() {
+  if (currentIndex === null) return;
+  const note = notes[currentIndex];
+  note.important = !note.important;
+  localStorage.setItem("notes", JSON.stringify(notes));
+  starBtn.classList.toggle("active", note.important);
+  renderNotes();
+}
+
+// --- Cập nhật trạng thái lưu ---
+function updateSaveStatus(state) {
+  if (state === "saving") {
+    saveStatus.textContent = "Saving...";
+    saveStatus.className = "save-status saving";
+  } else {
+    saveStatus.textContent = "Saved";
+    saveStatus.className = "save-status saved";
+  }
+}
+
+// ===================== MENU LOGIC =====================
+// ⋮ menu
+menuBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  dropdown.classList.toggle("show");
+});
+
+// ⚙️ settings
+settingsBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  settingsMenu.classList.toggle("show");
+});
+
+// Click ra ngoài để đóng
+window.addEventListener("click", (e) => {
+  if (!e.target.matches(".menu-btn")) dropdown.classList.remove("show");
+  if (!e.target.matches(".settings-btn")) settingsMenu.classList.remove("show");
+});
+
+// ===================== Event listeners =====================
+addNoteBtn.addEventListener("click", createNote);
+noteTitle.addEventListener("input", autoSave);
+noteContent.addEventListener("input", autoSave);
+starBtn.addEventListener("click", toggleImportant);
+deleteBtn.addEventListener("click", deleteNote);
+
+// ===================== Init =====================
 renderNotes();
