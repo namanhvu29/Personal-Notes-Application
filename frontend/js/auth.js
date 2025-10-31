@@ -43,17 +43,28 @@ if (registerForm) {
     const confirmPassword = document.getElementById('confirmPassword').value.trim();
     const registerMsg = document.getElementById('registerMsg');
 
-    if (!newUsername || !newEmail || !newPassword || !confirmPassword)
-      return registerMsg.innerText = 'Vui lòng nhập đầy đủ thông tin';
+    // Kiểm tra rỗng
+    if (!newUsername || !newEmail || !newPassword || !confirmPassword) {
+      registerMsg.innerText = '⚠️ Vui lòng nhập đầy đủ thông tin.';
+      registerMsg.style.color = 'red';
+      return;
+    }
     
     // Ràng buộc mật khẩu: Tối thiểu 8 ký tự, gồm cả chữ hoa, chữ thường và số
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
     
-    if (!passwordRegex.test(newPassword))
-      return registerMsg.innerText = 'Mật khẩu phải tối thiểu 8 ký tự, gồm chữ hoa, chữ thường và số';
+    if (!passwordRegex.test(newPassword)) {
+      registerMsg.innerText = '⚠️ Mật khẩu phải ≥8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.';
+      registerMsg.style.color = 'red';
+      return;
+    }
 
-    if (newPassword !== confirmPassword)
-      return registerMsg.innerText = 'Mật khẩu xác nhận không khớp';
+    // Xác nhận mật khẩu
+    if (newPassword !== confirmPassword) {
+      registerMsg.innerText = '⚠️ Mật khẩu xác nhận không khớp.';
+      registerMsg.style.color = 'red';
+      return;
+    }
 
     const users = JSON.parse(localStorage.getItem('users')) || [];
     

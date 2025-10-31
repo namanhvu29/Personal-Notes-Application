@@ -1,113 +1,304 @@
 body {
-    font-family: system-ui, sans-serif;
-    background-color: #fffbe6;
-    margin: 0;
-    padding: 0;
-  }
-  
-  header {
-    background: #ffda79;
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  }
-  
-  header h1 {
-    margin: 0;
-    font-size: 20px;
-  }
-  
-  #searchInput {
-    padding: 6px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-  }
-  
-  #logoutBtn {
-    background: #ffda79;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  
-  #logoutBtn:hover {
-    background: #ffcd45;
-  }
-  
-  #noteForm {
-    padding: 15px;
-    background: #fff;
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  #noteTitle {
-    font-size: 16px;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-  }
-  
-  #noteContent {
-    height: 100px;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    resize: vertical;
-  }
-  
-  #saveNote {
-    align-self: flex-start;
-    background: #ffda79;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  
-  #saveNote:hover {
-    background: #ffcd45;
-  }
-  
-  #noteList {
-    padding: 15px;
-  }
-  
-  .note {
-    background: #fffef2;
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    transition: transform 0.1s;
-  }
-  
-  .note:hover {
-    transform: scale(1.01);
-  }
-  
-  .note h3 {
-    margin: 0 0 6px 0;
-  }
-  
-  .note button {
-    background: #ffd43b;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 6px;
-    margin-right: 5px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  
-  .note button:hover {
-    background: #ffcd45;
-  }
-  
+  font-family: system-ui, sans-serif;
+  background-color: #fffdf5;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+/* ===== Sidebar ===== */
+/* ===== Sidebar ===== */
+.sidebar {
+  width: 280px;
+  background: #fff7d1;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+}
+
+.search-box {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+/* Vùng chứa 3 mục chính */
+.sections {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly; /* chia đều theo chiều dọc */
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+/* Các section có khoảng cách đồng nhất */
+.important-section,
+.notes-section,
+.category-section {
+  background: #fffdf0;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.important-section h3,
+.notes-section h3,
+.category-section h3 {
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+/* Notes header (Notes + Add button cùng hàng) */
+.notes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#addNoteBtn {
+  background: #ffd43b;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#addNoteBtn:hover {
+  background: #ffcc00;
+}
+
+
+/* ===== Settings bottom left ===== */
+.settings {
+  position: relative;
+  align-self: flex-end;
+}
+
+.settings-btn {
+  font-size: 22px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.settings-menu {
+  display: none;
+  position: absolute;
+  bottom: 35px;
+  left: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.settings-menu.show {
+  display: block;
+}
+
+.settings-menu button {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-menu button:hover {
+  background: #ffeb99;
+}
+
+/* ===== Main note view ===== */
+.note-view {
+  flex: 1;
+  padding: 20px 40px;
+  background: #fffef8;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.note-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ⭐ nút sao + tooltip */
+.star-container {
+  position: relative;
+  display: inline-block;
+}
+
+.star-btn {
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #ccc; /* mặc định xám */
+  transition: color 0.2s;
+}
+
+.star-btn.active {
+  color: #ffcc00; /* vàng khi được mark */
+}
+
+/* Tooltip tùy chỉnh */
+.tooltip {
+  visibility: hidden;
+  opacity: 0;
+  background-color: #333;
+  color: #fff;
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.star-container:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Dropdown menu (...) */
+.dropdown {
+  position: relative;
+}
+
+.menu-btn {
+  font-size: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 30px;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-content.show {
+  display: block;
+}
+
+.dropdown-content button {
+  display: block;
+  width: 150px;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdown-content button:hover {
+  background: #ffeb99;
+}
+
+.editor {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  max-width: 500px;
+}
+
+.editor.hidden {
+  display: none;
+}
+
+.editor input,
+.editor textarea {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+#saveNoteBtn, #cancelEditBtn {
+  align-self: flex-start;
+  background: #ffd43b;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#cancelEditBtn {
+  background: #ddd;
+  margin-left: 10px;
+}
+.note-title {
+  font-size: 22px;
+  font-weight: 600;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+
+.note-content {
+  width: 100%;
+  height: calc(100vh - 200px);
+  border: none;
+  outline: none;
+  font-size: 15px;
+  background: transparent;
+  resize: none;
+  padding-top: 15px;
+  line-height: 1.5;
+}
+
+.note-content::placeholder {
+  color: #aaa;
+}
+
+.note-title::placeholder {
+  color: #bbb;
+}
+
+.save-status {
+  font-size: 13px;
+  color: #888;
+  margin-left: 10px;
+  transition: opacity 0.3s;
+}
+
+.save-status.saving {
+  color: #c49b00;
+  opacity: 1;
+}
+
+.save-status.saved {
+  color: #4caf50;
+  opacity: 1;
+}
