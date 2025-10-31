@@ -1,10 +1,10 @@
-package com.webnote.webnote.entity;
+package FoundationProject.FoundationProject.entity;
 
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "Users")
-public class User {
+@Table(name = "Users", schema = "dbo")
+public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int user_id;
@@ -18,7 +18,7 @@ public class User {
     @Column(length = 100)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "bit default 1")
     private boolean active = true;
 
     // Getters và Setters

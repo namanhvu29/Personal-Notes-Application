@@ -1,19 +1,11 @@
-package com.webnote.webnote.dto.request;
+package FoundationProject.FoundationProject.controller;
 
-public class UserCreationRequest {
+public class UsersUpdateRequest {
 
-    private String username;
     private String password;
     private String email;
     private boolean active = true;
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
     public String getPassword() {
         return password;

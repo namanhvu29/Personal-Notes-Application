@@ -1,0 +1,53 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /foundation
+
+spring:
+  profiles:
+    active: dev   # Mặc định chạy môi trường dev, đổi sang prod khi deploy
+
+---
+
+# Cấu hình DEV
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:sqlserver://localhost\DEV:1433;databaseName=WebNotesSystem;encrypt=false;trustServerCertificate=true
+    username: sa
+    password: root
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: update       # Hibernate sẽ tạo bảng nếu chưa có, thêm cột nếu cần
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: dbo   # Set schema đúng với DB
+    show-sql: true
+
+---
+
+# Cấu hình PROD
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: jdbc:sqlserver://localhost\DEV:1433;databaseName=WebNotesSystem;encrypt=false;trustServerCertificate=true
+    username: sa
+    password: root
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: none          # Không tạo bảng mới, chỉ dùng bảng có sẵn
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        default_schema: dbo
+    show-sql: false

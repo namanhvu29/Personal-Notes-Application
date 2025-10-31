@@ -1,0 +1,84 @@
+package FoundationProject.FoundationProject.controller;
+
+import FoundationProject.FoundationProject.dto.request.UsersCreationRequest;
+import FoundationProject.FoundationProject.dto.request.UsersRegisterRequest;
+import FoundationProject.FoundationProject.dto.request.UsersLoginRequest;
+import FoundationProject.FoundationProject.entity.Users;
+import FoundationProject.FoundationProject.service.UsersService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/users")
+@CrossOrigin(origins = "*")
+public class UsersController {
+
+    @Autowired
+    private UsersService usersService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    // ĐĂNG KÝ NGƯỜI DÙNG
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody UsersRegisterRequest request) {
+        try {
+            usersService.register(request);
+            return ResponseEntity.ok("Đăng ký thành công!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Lỗi server, vui lòng thử lại!");
+        }
+    }
+
+    // ĐĂNG NHẬP NGƯỜI DÙNG
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UsersLoginRequest request) {
+        try {
+            Users user = usersService.findByUsernameOrEmail(request.getUsernameOrEmail());
+            if (user == null) {
+                return ResponseEntity.badRequest().body("Tài khoản không tồn tại!");
+            }
+
+            if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+                return ResponseEntity.badRequest().body("Sai mật khẩu!");
+            }
+
+            return ResponseEntity.ok("Đăng nhập thành công!");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Lỗi hệ thống: " + e.getMessage());
+        }
+    }
+
+    // CRUD
+    @PostMapping
+    public Users createUsers(@RequestBody UsersCreationRequest request) {
+        return usersService.createUsers(request);
+    }
+
+    @GetMapping
+    public List<Users> getUsers() {
+        return usersService.getUsers();
+    }
+
+    @GetMapping("/{usersId}")
+    public Users getUsers(@PathVariable("usersId") int usersId) {
+        return usersService.getUsersById(usersId);
+    }
+
+    @PutMapping("/{usersId}")
+    public Users updateUsers(@PathVariable("usersId") int usersId, @RequestBody UsersUpdateRequest request) {
+        return usersService.updateUsers(usersId, request);
+    }
+
+    @DeleteMapping("/{usersId}")
+    public String deleteUsers(@PathVariable int usersId) {
+        usersService.deleteUser(usersId);
+        return "Users has been deleted";
+    }
+}
