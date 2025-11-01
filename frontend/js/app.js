@@ -14,20 +14,31 @@ const settingsBtn = document.querySelector(".settings-btn");
 const settingsMenu = document.querySelector(".settings-menu");
 
 // ===================== Notes logic =====================
-let notes = JSON.parse(localStorage.getItem("notes") || "[]");
+const API_URL = "http://localhost:8080";
+let notes = [];
 let currentIndex = null;
 let saveTimeout = null;
 
 // --- Render danh sách notes ---
-function renderNotes() {
-  notesList.innerHTML = "";
-  notes.forEach((note, index) => {
-    const li = document.createElement("li");
-    li.textContent = note.title || "Untitled";
-    if (note.important) li.classList.add("important");
-    li.addEventListener("click", () => openNote(index));
-    notesList.appendChild(li);
-  });
+async function renderNotes() {
+  const userId = 1; // Hardcoded user ID for now
+  try {
+    const response = await fetch(`${API_URL}/notes/user/${userId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch notes');
+    }
+    notes = await response.json();
+    notesList.innerHTML = "";
+    notes.forEach((note, index) => {
+      const li = document.createElement("li");
+      li.textContent = note.title || "Untitled";
+      if (note.is_important) li.classList.add("important");
+      li.addEventListener("click", () => openNote(index));
+      notesList.appendChild(li);
+    });
+  } catch (error) {
+    console.error('Error fetching notes:', error);
+  }
 }
 
 // --- Mở note ---
@@ -36,24 +47,36 @@ function openNote(index) {
   const note = notes[index];
   noteTitle.value = note.title;
   noteContent.value = note.content;
-  starBtn.classList.toggle("active", note.important);
+  starBtn.classList.toggle("active", note.is_important);
   updateSaveStatus("saved");
 }
 
 // --- Tạo note ---
-function createNote() {
-  const newNote = { title: "", content: "", important: false };
-  notes.push(newNote);
-  currentIndex = notes.length - 1;
-  localStorage.setItem("notes", JSON.stringify(notes));
-  renderNotes();
-  openNote(currentIndex);
-  noteTitle.focus();
+async function createNote() {
+  const newNote = { title: "Untitled", content: "", is_important: false, userId: 1 };
+  try {
+    const response = await fetch(`${API_URL}/notes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newNote),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create note');
+    }
+    await renderNotes();
+    const newNoteIndex = notes.length - 1;
+    openNote(newNoteIndex);
+    noteTitle.focus();
+  } catch (error) {
+    console.error('Error creating note:', error);
+  }
 }
 
 // --- Auto save (hiện "Saving..." → "Saved") ---
 function autoSave() {
-  if (currentIndex === null) createNote();
+  if (currentIndex === null) return;
   const note = notes[currentIndex];
   note.title = noteTitle.value;
   note.content = noteContent.value;
@@ -61,36 +84,73 @@ function autoSave() {
   updateSaveStatus("saving");
 
   clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(() => {
-    localStorage.setItem("notes", JSON.stringify(notes));
-    renderNotes();
-    updateSaveStatus("saved");
+  saveTimeout = setTimeout(async () => {
+    try {
+      const response = await fetch(`${API_URL}/notes/${note.note_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(note),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to save note');
+      }
+      await renderNotes();
+      updateSaveStatus("saved");
+    } catch (error) {
+      console.error('Error saving note:', error);
+      updateSaveStatus("error");
+    }
   }, 800);
 }
 
 // --- Delete note ---
-function deleteNote() {
+async function deleteNote() {
   if (currentIndex === null) return alert("Không có note nào được chọn!");
   if (!confirm("Bạn có chắc muốn xóa ghi chú này không?")) return;
 
-  notes.splice(currentIndex, 1);
-  localStorage.setItem("notes", JSON.stringify(notes));
-  currentIndex = null;
+  const note = notes[currentIndex];
 
-  noteTitle.value = "";
-  noteContent.value = "";
-  updateSaveStatus("saved");
-  renderNotes();
+  try {
+    const response = await fetch(`${API_URL}/notes/${note.note_id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete note');
+    }
+    currentIndex = null;
+    noteTitle.value = "";
+    noteContent.value = "";
+    updateSaveStatus("saved");
+    await renderNotes();
+  } catch (error) {
+    console.error('Error deleting note:', error);
+  }
 }
 
 // --- Mark important ---
-function toggleImportant() {
+async function toggleImportant() {
   if (currentIndex === null) return;
   const note = notes[currentIndex];
-  note.important = !note.important;
-  localStorage.setItem("notes", JSON.stringify(notes));
-  starBtn.classList.toggle("active", note.important);
-  renderNotes();
+  note.is_important = !note.is_important;
+
+  try {
+    const response = await fetch(`${API_URL}/notes/${note.note_id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(note),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update note importance');
+    }
+    starBtn.classList.toggle("active", note.is_important);
+    await renderNotes();
+  } catch (error) {
+    console.error('Error updating note importance:', error);
+  }
 }
 
 // --- Cập nhật trạng thái lưu ---
@@ -98,9 +158,12 @@ function updateSaveStatus(state) {
   if (state === "saving") {
     saveStatus.textContent = "Saving...";
     saveStatus.className = "save-status saving";
-  } else {
+  } else if (state === "saved") {
     saveStatus.textContent = "Saved";
     saveStatus.className = "save-status saved";
+  } else if (state === "error") {
+    saveStatus.textContent = "Error saving!";
+    saveStatus.className = "save-status error";
   }
 }
 
@@ -130,5 +193,6 @@ noteContent.addEventListener("input", autoSave);
 starBtn.addEventListener("click", toggleImportant);
 deleteBtn.addEventListener("click", deleteNote);
 
-// ===================== Init =====================
-renderNotes();
+document.addEventListener('DOMContentLoaded', () => {
+  renderNotes();
+});
