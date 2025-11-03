@@ -1,95 +1,191 @@
 // Khởi tạo danh sách người dùng mặc định
 let defaultUsers = [
-  { username: 'admin', email: 'admin@gmail.com', password: '123', role: 'admin' },
-  { username: 'user', email: 'user@gmail.com', password: '123', role: 'user' }
-];
+    { username: 'admin', email: 'admin@gmail.com', password: '123', role: 'admin' },
+    { username: 'user', email: 'user@gmail.com', password: '123', role: 'user' }
+// Khởi tạo danh sách người dùng mặc định
+let defaultUsers = [
+        { username: 'admin', email: 'admin@gmail.com', password: '123', role: 'admin' },
+        { username: 'user', email: 'user@gmail.com', password: '123', role: 'user' }
+    ];
 
 // Lấy danh sách user trong localStorage hoặc dùng mặc định
-let users = JSON.parse(localStorage.getItem('users')) || defaultUsers;
+// API URL
+const API_URL = 'http://localhost:8080/foundation';
 
-// Chỉ ghi lại vào localStorage nếu đang dùng mặc định ban đầu HOẶC cần cập nhật cấu trúc
-if (!localStorage.getItem('users')) {
-  localStorage.setItem('users', JSON.stringify(users));
+// ========================================
+// HELPER: GET AUTH HEADERS
+// ========================================
+function getAuthHeaders() {
+    const token = localStorage.getItem('accessToken');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
 }
 
-// ---- XỬ LÝ ĐĂNG NHẬP ----
+// ========================================
+// ĐĂNG NHẬP - GỌI API BACKEND
+// ========================================
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
-  loginForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const usernameOrEmail = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    
-    // Tìm người dùng qua username hoặc email
-    const user = users.find(u => 
-      (u.username === usernameOrEmail || u.email === usernameOrEmail) && u.password === password);
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    if (!user) return document.getElementById('errorMsg').innerText = 'Sai thông tin đăng nhập';
-    
-    localStorage.setItem('currentUser', JSON.stringify(user));
-    window.location.href = user.role === 'admin' ? 'admin.html' : 'index.html';
-  });
+        const usernameOrEmail = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const errorMsg = document.getElementById('errorMsg');
+
+        errorMsg.innerText = 'Đang đăng nhập...';
+        errorMsg.style.color = '#999';
+
+        try {
+            // Bước 1: Gọi API login
+            const loginResponse = await fetch(`${API_URL}/users/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    usernameOrEmail: usernameOrEmail,
+                    password: password
+                })
+            });
+
+            if (!loginResponse.ok) {
+                const errorText = await loginResponse.text();
+                errorMsg.style.color = 'red';
+                errorMsg.innerText = errorText || 'Đăng nhập thất bại!';
+                return;
+            }
+
+            const data = await loginResponse.json();
+
+            // Bước 2: Lưu token và thông tin user
+            localStorage.setItem('accessToken', data.accessToken);
+            localStorage.setItem('currentUser', JSON.stringify({
+                user_id: data.user_id,
+                username: data.username,
+                email: data.email,
+                role: data.role
+            }));
+
+            console.log('✅ Đăng nhập thành công!');
+            console.log('Token:', data.accessToken);
+
+            // Bước 3: Chuyển hướng
+            errorMsg.style.color = 'green';
+            errorMsg.innerText = 'Đăng nhập thành công! Đang chuyển hướng...';
+
+            setTimeout(() => {
+                window.location.href = data.role === 'admin' ? 'admin.html' : 'index.html';
+            }, 1000);
+
+        } catch (error) {
+            console.error('❌ Login error:', error);
+            errorMsg.style.color = 'red';
+            errorMsg.innerText = 'Lỗi kết nối server! Đảm bảo backend đang chạy.';
+        }
+    });
 }
 
-// ---- XỬ LÝ ĐĂNG KÝ ----
+// ========================================
+// ĐĂNG KÝ - GỌI API BACKEND
+// ========================================
 const registerForm = document.getElementById('registerForm');
 if (registerForm) {
-  registerForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const newUsername = document.getElementById('newUsername').value.trim();
-    const newEmail = document.getElementById('newEmail').value.trim(); // Lấy giá trị Email
-    const newPassword = document.getElementById('newPassword').value.trim();
-    const confirmPassword = document.getElementById('confirmPassword').value.trim();
-    const registerMsg = document.getElementById('registerMsg');
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    // Kiểm tra rỗng
-    if (!newUsername || !newEmail || !newPassword || !confirmPassword) {
-      registerMsg.innerText = '⚠️ Vui lòng nhập đầy đủ thông tin.';
-      registerMsg.style.color = 'red';
-      return;
-    }
-    
-    // Ràng buộc mật khẩu: Tối thiểu 8 ký tự, gồm cả chữ hoa, chữ thường và số
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
-    
-    if (!passwordRegex.test(newPassword)) {
-      registerMsg.innerText = '⚠️ Mật khẩu phải ≥8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.';
-      registerMsg.style.color = 'red';
-      return;
-    }
+        const newUsername = document.getElementById('newUsername').value.trim();
+        const newEmail = document.getElementById('newEmail').value.trim();
+        const newPassword = document.getElementById('newPassword').value.trim();
+        const confirmPassword = document.getElementById('confirmPassword').value.trim();
+        const registerMsg = document.getElementById('registerMsg');
 
-    // Xác nhận mật khẩu
-    if (newPassword !== confirmPassword) {
-      registerMsg.innerText = '⚠️ Mật khẩu xác nhận không khớp.';
-      registerMsg.style.color = 'red';
-      return;
-    }
+        // Validation
+        if (!newUsername || !newEmail || !newPassword || !confirmPassword) {
+            registerMsg.innerText = '⚠️ Vui lòng nhập đầy đủ thông tin.';
+            registerMsg.style.color = 'red';
+            return;
+        }
 
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    
-    // Kiểm tra tên đăng nhập hoặc email đã tồn tại
-    const exists = users.some(u => u.username === newUsername || u.email === newEmail);
-    if (exists) return registerMsg.innerText = 'Tên đăng nhập hoặc Email đã tồn tại';
+        if (newPassword !== confirmPassword) {
+            registerMsg.innerText = '⚠️ Mật khẩu xác nhận không khớp.';
+            registerMsg.style.color = 'red';
+            return;
+        }
 
-    // Thêm email vào đối tượng người dùng mới
-    users.push({ username: newUsername, email: newEmail, password: newPassword, role: 'user' });
-    localStorage.setItem('users', JSON.stringify(users));
-    registerMsg.style.color = 'green';
-    registerMsg.innerText = 'Đăng ký thành công! Chuyển hướng...';
-    
-    setTimeout(() => {
-      window.location.href = 'login.html';
-    }, 1500);
-  });
+        registerMsg.innerText = 'Đang đăng ký...';
+        registerMsg.style.color = '#999';
+
+        try {
+            const response = await fetch(`${API_URL}/users/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: newUsername,
+                    email: newEmail,
+                    password: newPassword,
+                    confirmPassword: confirmPassword
+                })
+            });
+
+            const result = await response.text();
+
+            if (!response.ok) {
+                registerMsg.style.color = 'red';
+                registerMsg.innerText = result;
+                return;
+            }
+
+            registerMsg.style.color = 'green';
+            registerMsg.innerText = 'Đăng ký thành công! Đang chuyển hướng...';
+
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1500);
+
+        } catch (error) {
+            console.error('❌ Register error:', error);
+            registerMsg.style.color = 'red';
+            registerMsg.innerText = 'Lỗi kết nối server!';
+        }
+    });
 }
 
-// ---- ĐĂNG XUẤT ----
-const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-if (currentUser && !window.location.href.includes('login.html') && !window.location.href.includes('register.html')) {
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) logoutBtn.onclick = () => {
-    localStorage.removeItem('currentUser');
-    window.location.href = 'login.html';
-  };
+// ========================================
+// ĐĂNG XUẤT
+// ========================================
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('accessToken');
+        console.log('✅ Đã đăng xuất');
+        window.location.href = 'login.html';
+    });
 }
+
+// ========================================
+// KIỂM TRA ĐĂNG NHẬP KHI VÀO INDEX.HTML
+// ========================================
+if (window.location.pathname.includes('index.html')) {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    const token = localStorage.getItem('accessToken');
+
+    console.log('=== CHECK LOGIN STATUS ===');
+
+    if (!currentUser || !token) {
+        console.log('❌ Chưa đăng nhập, redirect về login');
+        alert('Vui lòng đăng nhập trước!');
+        window.location.href = 'login.html';
+    } else {
+        console.log('✅ Đã đăng nhập, user:', currentUser.username);
+        // Có thể thêm logic verify token với backend ở đây nếu cần
+    }
+}
+
+// ========================================
+// DEBUG INFO
+// ========================================
+console.log('=== AUTH.JS LOADED ===');
+console.log('API URL:', API_URL);
