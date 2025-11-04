@@ -256,6 +256,36 @@ window.addEventListener("click", (e) => {
     if (!e.target.matches(".settings-btn")) settingsMenu.classList.remove("show");
 });
 
+// === Tự động tạo ghi chú mới khi người dùng tương tác với vùng trống ===
+
+// Lấy phần hiển thị note chính (khu vực để gõ nội dung)
+const noteView = document.getElementById("noteView");
+let isCreating = false; // tránh tạo trùng note khi click nhanh liên tục
+
+// Khi click vào vùng trắng, nếu chưa có note nào đang mở -> tạo mới
+noteView.addEventListener("click", async (e) => {
+  // Kiểm tra nếu click vào chính vùng note (không phải sidebar, không phải nút)
+  const isInsideEditor = e.target === noteView || noteView.contains(e.target);
+
+  if (isInsideEditor && !currentNoteId && !isCreating) {
+    isCreating = true;
+    await createNote();
+    isCreating = false;
+  }
+});
+
+// Khi người dùng bắt đầu gõ (hoặc focus vào input) mà chưa có note -> tự tạo note
+[noteTitle, noteContent].forEach((el) => {
+  el.addEventListener("focus", async () => {
+    if (!currentNoteId && !isCreating) {
+      isCreating = true;
+      await createNote();
+      isCreating = false;
+    }
+  });
+});
+
+
 // ===================== Event listeners =====================
 addNoteBtn.addEventListener("click", createNote);
 noteTitle.addEventListener("input", autoSave);
