@@ -23,14 +23,26 @@ public class NotesService {
 
     // Tạo note mới
     public NotesResponse createNote(NotesCreationRequest request) {
-        // Kiểm tra user có tồn tại không
+        // Kiểm tra user tồn tại
         if (!usersRepository.existsById(request.getUser_id())) {
             throw new IllegalArgumentException("User không tồn tại!");
         }
 
         Notes note = new Notes();
         note.setUser_id(request.getUser_id());
-        note.setTitle(request.getTitle() != null ? request.getTitle() : "Untitled");
+
+        // Xử lý title: nếu trùng thì thêm số thứ tự
+        String baseTitle = (request.getTitle() != null && !request.getTitle().isEmpty()) ? request.getTitle() : "Untitled";
+        String title = baseTitle;
+        int counter = 1;
+
+        while (notesRepository.existsByTitleAndUserId(title, request.getUser_id())) {
+            title = baseTitle + counter;
+            counter++;
+        }
+        note.setTitle(title);
+
+        // Set content và trạng thái quan trọng
         note.setContent(request.getContent() != null ? request.getContent() : "");
         note.setIs_important(request.isIs_important());
 
@@ -46,15 +58,15 @@ public class NotesService {
                 .collect(Collectors.toList());
     }
 
-    // Lấy notes quan trọng của user
+    // Lấy notes quan trọng
     public List<NotesResponse> getImportantNotes(int userId) {
-        List<Notes> notes = notesRepository.findByUserIdAndIsImportant(userId, true);
+        List<Notes> notes = notesRepository.findByUserIdAndIsImportant(userId);
         return notes.stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
 
-    // Lấy chi tiết 1 note
+    // Lấy chi tiết note theo id
     public NotesResponse getNoteById(int noteId) {
         Notes note = notesRepository.findById(noteId)
                 .orElseThrow(() -> new RuntimeException("Note không tồn tại!"));
@@ -66,14 +78,27 @@ public class NotesService {
         Notes note = notesRepository.findById(noteId)
                 .orElseThrow(() -> new RuntimeException("Note không tồn tại!"));
 
-        if (request.getTitle() != null) {
-            note.setTitle(request.getTitle());
+        // 1. Update title nếu có
+        if (request.getTitle() != null && !request.getTitle().isEmpty()) {
+            String newTitle = request.getTitle();
+
+            if (notesRepository.existsByTitleAndUserId(newTitle, note.getUser_id())
+                    && !newTitle.equals(note.getTitle())) {
+                throw new RuntimeException("Note đã tồn tại!");
+            }
+
+            note.setTitle(newTitle);
         }
+
+        // 2. Update content
         if (request.getContent() != null) {
             note.setContent(request.getContent());
         }
+
+        // 3. Update trạng thái quan trọng
         note.setIs_important(request.isIs_important());
 
+        // 4. Lưu
         Notes updatedNote = notesRepository.save(note);
         return convertToResponse(updatedNote);
     }
@@ -94,7 +119,7 @@ public class NotesService {
                 .collect(Collectors.toList());
     }
 
-    // Chuyển đổi Entity -> Response DTO
+    // Chuyển đổi entity -> response DTO
     private NotesResponse convertToResponse(Notes note) {
         return new NotesResponse(
                 note.getNote_id(),

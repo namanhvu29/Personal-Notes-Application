@@ -9,13 +9,13 @@ import java.util.List;
 
 public interface NotesRepository extends JpaRepository<Notes, Integer> {
 
-    // Tìm tất cả notes của một user (dùng @Query thay vì method name)
+    // Lấy tất cả notes của một user
     @Query("SELECT n FROM Notes n WHERE n.user_id = :userId")
     List<Notes> findByUserId(@Param("userId") int userId);
 
-    // Tìm notes quan trọng của user
-    @Query("SELECT n FROM Notes n WHERE n.user_id = :userId AND n.is_important = :isImportant")
-    List<Notes> findByUserIdAndIsImportant(@Param("userId") int userId, @Param("isImportant") boolean isImportant);
+    // Lấy notes quan trọng của user
+    @Query("SELECT n FROM Notes n WHERE n.user_id = :userId AND n.is_important = true")
+    List<Notes> findByUserIdAndIsImportant(@Param("userId") int userId);
 
     // Tìm kiếm notes theo title hoặc content
     @Query("SELECT n FROM Notes n WHERE n.user_id = :userId AND " +
@@ -26,4 +26,9 @@ public interface NotesRepository extends JpaRepository<Notes, Integer> {
     // Đếm số lượng notes của user
     @Query("SELECT COUNT(n) FROM Notes n WHERE n.user_id = :userId")
     long countByUserId(@Param("userId") int userId);
+
+    // Kiểm tra tồn tại note theo title và user
+    @Query("SELECT CASE WHEN COUNT(n) > 0 THEN true ELSE false END FROM Notes n " +
+            "WHERE n.title = :title AND n.user_id = :userId")
+    boolean existsByTitleAndUserId(@Param("title") String title, @Param("userId") int userId);
 }
