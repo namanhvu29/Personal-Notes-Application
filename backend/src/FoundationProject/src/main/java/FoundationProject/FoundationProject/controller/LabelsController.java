@@ -26,6 +26,13 @@ public class LabelsController {
         }
     }
 
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllLabels() {
+        return ResponseEntity.ok(labelsService.getAllLabels());
+    }
+
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getLabelsByUser(@PathVariable int userId) {
         return ResponseEntity.ok(labelsService.getLabelsByUser(userId));
