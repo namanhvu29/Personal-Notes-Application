@@ -72,6 +72,21 @@ public class NotesService {
                 .orElseThrow(() -> new RuntimeException("Note không tồn tại!"));
         return convertToResponse(note);
     }
+    // lay full note
+    public List<NotesResponse> getAllNotes() {
+        List<Notes> notes = notesRepository.findAll();
+        return notes.stream()
+                .map(n -> new NotesResponse(
+                        n.getNote_id(),
+                        n.getUser_id(),
+                        n.getTitle(),
+                        n.getContent(),
+                        n.isIs_important(),
+                        n.getCreated_at(),
+                        n.getUpdated_at()))
+                .toList();
+    }
+
 
     // Cập nhật note
     public NotesResponse updateNote(int noteId, NotesUpdateRequest request) {

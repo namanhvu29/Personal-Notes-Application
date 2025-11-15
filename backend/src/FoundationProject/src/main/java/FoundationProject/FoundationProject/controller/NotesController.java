@@ -4,13 +4,12 @@ import FoundationProject.FoundationProject.dto.request.NotesCreationRequest;
 import FoundationProject.FoundationProject.dto.request.NotesUpdateRequest;
 import FoundationProject.FoundationProject.dto.response.NotesResponse;
 import FoundationProject.FoundationProject.service.NotesService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import FoundationProject.FoundationProject.repository.NoteLabelsRepository;
 import FoundationProject.FoundationProject.entity.NoteLabels;
-
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,8 +17,6 @@ import java.util.List;
 @RequestMapping("/notes")
 @CrossOrigin(origins = "*")
 public class NotesController {
-
-
 
     @Autowired
     private NoteLabelsRepository noteLabelsRepository;
@@ -40,6 +37,18 @@ public class NotesController {
         }
     }
 
+
+    @GetMapping
+    public ResponseEntity<?> getAllNotes() {
+        try {
+            List<NotesResponse> notes = notesService.getAllNotes();
+            return ResponseEntity.ok(notes);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Lỗi: " + e.getMessage());
+        }
+    }
+
+
     // Lấy tất cả notes của user
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getNotesByUser(@PathVariable int userId) {
@@ -48,6 +57,17 @@ public class NotesController {
             return ResponseEntity.ok(notes);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Lỗi lấy danh sách ghi chú: " + e.getMessage());
+        }
+    }
+
+    // Lấy danh sách labels của 1 note
+    @GetMapping("/{noteId}/labels")
+    public ResponseEntity<?> getLabelsOfNote(@PathVariable int noteId) {
+        try {
+            List<NoteLabels> labels = noteLabelsRepository.findByNoteId(noteId);
+            return ResponseEntity.ok(labels);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Lỗi khi lấy nhãn: " + e.getMessage());
         }
     }
 
@@ -114,15 +134,17 @@ public class NotesController {
         }
     }
 
+    // Gán nhãn cho note
     @PostMapping("/{noteId}/labels")
+    @Transactional
     public ResponseEntity<?> assignLabelsToNote(@PathVariable int noteId, @RequestBody List<Integer> labelIds) {
         try {
-            // Sửa tên method delete theo camelCase
+            // Xóa các label cũ của note
             noteLabelsRepository.deleteByNoteId(noteId);
 
+            // Thêm label mới
             for (int labelId : labelIds) {
                 NoteLabels nl = new NoteLabels();
-                // Sửa setter theo camelCase
                 nl.setNoteId(noteId);
                 nl.setLabelId(labelId);
                 noteLabelsRepository.save(nl);
@@ -132,8 +154,4 @@ public class NotesController {
             return ResponseEntity.internalServerError().body("Lỗi khi gán nhãn: " + e.getMessage());
         }
     }
-
-
-
-
 }

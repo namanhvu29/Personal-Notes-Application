@@ -2,8 +2,10 @@ package FoundationProject.FoundationProject.repository;
 
 import FoundationProject.FoundationProject.entity.NoteLabels;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,5 +20,8 @@ public interface NoteLabelsRepository extends JpaRepository<NoteLabels, Integer>
     List<NoteLabels> findByLabelId(@Param("labelId") int labelId);
 
     // Xóa theo noteId
-    void deleteByNoteId(int noteId);
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM NoteLabels nl WHERE nl.noteId = :noteId")
+    void deleteByNoteId(@Param("noteId") int noteId);
 }
