@@ -1,3 +1,6 @@
+/* ========================================================= */
+/* 1. ĐỊNH DẠNG CHUNG (Base Styles) */
+/* ========================================================= */
 body {
   font-family: system-ui, sans-serif;
   background-color: #fffdf5;
@@ -10,36 +13,100 @@ body {
   height: 100vh;
 }
 
-/* ===== Sidebar ===== */
-/* ===== Sidebar ===== */
+/* ========================================================= */
+/* 2. SIDEBAR */
+/* ========================================================= */
 .sidebar {
   width: 280px;
-  background: #fff7d1;
+  background: #fff7d1; /* Màu nền nhẹ nhàng */
   border-right: 1px solid #ddd;
   display: flex;
   flex-direction: column;
   padding: 15px;
+  position: relative; /* Added for absolute positioning of search results */
 }
 
-.search-box {
-  width: 100%;
-  padding: 6px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  margin-bottom: 10px;
-}
-
-/* Vùng chứa 3 mục chính */
+/* Vùng chứa các Section chính (Quan trọng, Ghi chú, Danh mục) */
 .sections {
-  flex: 1;
+  flex: 1; /* Chiếm hết không gian còn lại */
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly; /* chia đều theo chiều dọc */
+  justify-content: space-evenly; 
   margin-top: 10px;
   margin-bottom: 20px;
 }
 
-/* Các section có khoảng cách đồng nhất */
+.search-wrapper {
+  display: flex; /* Dùng flexbox để căn chỉnh icon và input */
+  align-items: center; /* Căn giữa theo chiều dọc */
+  
+  /* Box model & Style của thanh tìm kiếm */
+  background: #ffffff; 
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); 
+  padding: 6px 10px; /* Padding tổng thể cho cả wrapper */
+  margin-bottom: 10px;
+}
+
+.search-icon {
+  font-size: 16px; /* Kích thước icon */
+  color: #888; /* Màu icon xám */
+  margin-right: 8px; /* Khoảng cách giữa icon và chữ */
+  flex-shrink: 0; 
+}
+
+/* CHỈNH SỬA: Thay thế khối .search-box cũ bằng khối này */
+.search-box {
+  flex-grow: 1; /* Cho phép input chiếm hết không gian còn lại */
+  width: 100%; 
+  padding: 0; /* Loại bỏ padding cũ */
+  border: none;
+  outline: none; 
+  background: transparent; /* Nền trong suốt để thấy nền của wrapper */
+  font-size: 15px;
+}
+
+.search-box:focus {
+  /* Xóa style focus cũ, chỉ cần giữ outline: none; */
+  outline: none;
+  box-shadow: none; /* Xóa box-shadow focus khỏi input */
+}
+
+/* Hiệu ứng khi focus cho toàn bộ wrapper */
+.search-wrapper:focus-within {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15), 0 0 0 2px #ffd43b; /* Shadow + viền vàng nhẹ */
+}
+/* Container kết quả tìm kiếm (Đã cập nhật vị trí tuyệt đối) */
+.search-results-container {
+  position: absolute; /* Đặt vị trí tuyệt đối so với sidebar (nếu sidebar là relative) */
+
+  /* Căn chỉnh vị trí */
+  top: 55px;
+  left: 15px; /* Căn theo padding trái của sidebar */
+  right: 15px; /* Căn theo padding phải của sidebar */
+
+  z-index: 10;
+
+  /* Xóa margin-top cũ vì giờ nó là absolute */
+  margin-top: 0;
+  margin-bottom: 5px; /* Giữ margin-bottom để tạo khoảng cách */
+
+  background: #ffffff;
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Đổ bóng rõ nét hơn */
+
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+}
+
+.search-results-container.show {
+  display: block;
+}
+
+
+/* Định dạng chung cho các Section */
 .important-section,
 .notes-section,
 .category-section {
@@ -47,6 +114,12 @@ body {
   border: 1px solid #eee;
   border-radius: 8px;
   padding: 10px;
+  margin-bottom: 15px; /* Thêm khoảng cách rõ ràng giữa các section */
+}
+.important-section:last-child,
+.notes-section:last-child,
+.category-section:last-child {
+  margin-bottom: 0;
 }
 
 .important-section h3,
@@ -56,7 +129,7 @@ body {
   font-size: 16px;
 }
 
-/* Notes header (Notes + Add button cùng hàng) */
+/* Notes header (Ghi chú + Add button cùng hàng) */
 .notes-header {
   display: flex;
   justify-content: space-between;
@@ -69,14 +142,58 @@ body {
   padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
 #addNoteBtn:hover {
   background: #ffcc00;
 }
 
+/* Danh sách Ghi chú và Quan trọng */
+#notesList, #importantList, #categoryList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
 
-/* ===== Settings bottom left ===== */
+#notesList li, #importantList li {
+  padding: 5px 0;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 4px;
+}
+
+#notesList li:hover, #importantList li:hover {
+  background-color: #ffeb99;
+}
+#notesList li.selected, #importantList li.selected {
+  font-weight: bold;
+  background-color: #ffd43b;
+}
+
+/* Danh mục (Category) */
+.category-notes {
+  list-style: none;
+  padding-left: 15px;
+  margin: 5px 0;
+  display: none; /* Mặc định ẩn, được toggle bằng JS */
+  font-size: 14px;
+}
+
+.category-notes li {
+  cursor: pointer;
+  padding: 3px 0;
+}
+
+.category-notes li:hover {
+  background-color: #ffeb99;
+}
+
+/* ========================================================= */
+/* 3. SETTINGS (Góc dưới Sidebar) */
+/* ========================================================= */
 .settings {
   position: relative;
   align-self: flex-end;
@@ -98,6 +215,7 @@ body {
   border: 1px solid #ccc;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 20; /* Đảm bảo menu hiển thị trên các element khác */
 }
 
 .settings-menu.show {
@@ -118,26 +236,101 @@ body {
   background: #ffeb99;
 }
 
-/* ===== Main note view ===== */
+/* ========================================================= */
+/* 4. MAIN NOTE VIEW (Khu vực chỉnh sửa) - Cập nhật */
+/* ========================================================= */
 .note-view {
   flex: 1;
-  padding: 20px 40px;
+  padding: 20px 40px; /* Vẫn giữ padding tổng thể cho note-view */
   background: #fffef8;
+  display: flex;
+  flex-direction: column;
 }
 
 .note-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end; /* Đẩy save status và actions sang phải */
   align-items: center;
+  margin-bottom: 20px; /* Khoảng cách với nội dung */
+  padding-right: 40px; /* Đồng bộ padding với nội dung */
+  /* Remove padding-left: 40px; if it was there */
 }
 
+/* THÊM MỚI: Định dạng cho wrapper nội dung */
+.note-content-wrapper {
+  flex: 1; /* Cho phép nó chiếm không gian còn lại */
+  display: flex;
+  flex-direction: column;
+  
+  max-width: 700px; /* Chiều rộng tối đa mong muốn (có thể điều chỉnh) */
+  margin: 0 auto; /* Căn giữa wrapper này */
+  width: 100%; /* Đảm bảo nó chiếm max-width khi có thể */
+  padding: 0 20px; /* Padding nhẹ bên trong wrapper */
+}
+
+.note-title {
+  font-size: 2.5em; /* Kích thước chữ lớn hơn cho tiêu đề */
+  font-weight: 700;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 10px 0; /* Padding trên dưới cho tiêu đề */
+  margin-bottom: 20px; /* Khoảng cách với nội dung */
+  box-sizing: border-box; /* Đảm bảo padding không làm tràn width */
+}
+
+.note-title::placeholder {
+  color: #bbb;
+}
+
+.note-content {
+  flex: 1; /* Chiếm hết chiều cao còn lại trong wrapper */
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 1.1em; /* Kích thước chữ dễ đọc hơn */
+  background: transparent;
+  resize: none;
+  line-height: 1.8; /* Giãn dòng thoải mái */
+  padding: 0; /* Reset padding nếu có từ trước */
+  box-sizing: border-box; /* Đảm bảo padding không làm tràn width */
+}
+
+.note-content::placeholder {
+  color: #aaa;
+}
+
+/* Trạng thái lưu (Saving Status) */
+.save-status {
+  font-size: 13px;
+  color: #888;
+  margin-left: 10px;
+  transition: color 0.3s, opacity 0.3s;
+  white-space: nowrap;
+}
+
+.save-status.saving {
+  color: #c49b00;
+}
+
+.save-status.saved {
+  color: #4caf50;
+}
+
+
+/* ========================================================= */
+/* 5. NOTE ACTIONS (⭐, ⋮) */
+/* ========================================================= */
 .note-actions {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-left: 10px; /* Tạo khoảng cách với save status */
 }
 
-/* ⭐ nút sao + tooltip */
+
+/* ⭐ Nút Quan trọng + Tooltip */
 .star-container {
   position: relative;
   display: inline-block;
@@ -148,15 +341,24 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  color: #ccc; /* mặc định xám */
+  
+  /* MẶC ĐỊNH: Màu tối (viền đen) */
+  color: #333; 
+  
+  /* Do ta dùng ký tự ☆ (rỗng), ta chỉ cần điều chỉnh màu sắc */
   transition: color 0.2s;
 }
 
 .star-btn.active {
-  color: #ffcc00; /* vàng khi được mark */
+  /* Khi active, ngôi sao tô màu vàng */
+  color: #ffcc00; 
+  /* Có thể tăng font weight để làm ngôi sao trông đầy đặn hơn */
+  font-weight: bold; 
 }
 
-/* Tooltip tùy chỉnh */
+/* Các định nghĩa khác cho tooltip giữ nguyên... */
+/* ... */
+
 .tooltip {
   visibility: hidden;
   opacity: 0;
@@ -180,7 +382,7 @@ body {
   opacity: 1;
 }
 
-/* Dropdown menu (...) */
+/* Dropdown Menu (⋮) */
 .dropdown {
   position: relative;
 }
@@ -193,7 +395,7 @@ body {
 }
 
 .dropdown-content {
-  display: none;
+  display: none; /* Mặc định ẩn, hiển thị bằng JS */
   position: absolute;
   top: 30px;
   right: 0;
@@ -201,15 +403,13 @@ body {
   border: 1px solid #ccc;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.dropdown-content.show {
-  display: block;
+  z-index: 15;
 }
 
 .dropdown-content button {
   display: block;
-  width: 150px;
+  width: 100%; /* Chỉnh thành 100% thay vì 150px để linh hoạt hơn */
+  min-width: 150px;
   padding: 8px 12px;
   background: none;
   border: none;
@@ -221,84 +421,18 @@ body {
   background: #ffeb99;
 }
 
-.editor {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
-  max-width: 500px;
+/* Dropdown chọn danh mục */
+.add-to-category-wrapper {
+  position: relative;
 }
 
-.editor.hidden {
-  display: none;
+.category-dropdown {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  /* Có thể ẩn/hiện categoryDropdown bằng cách toggle class hoặc JS */
 }
 
-.editor input,
-.editor textarea {
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-#saveNoteBtn, #cancelEditBtn {
-  align-self: flex-start;
-  background: #ffd43b;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-#cancelEditBtn {
-  background: #ddd;
-  margin-left: 10px;
-}
-.note-title {
-  font-size: 22px;
-  font-weight: 600;
-  width: 100%;
-  border: none;
-  outline: none;
-  background: transparent;
-}
-
-.note-content {
-  width: 100%;
-  height: calc(100vh - 200px);
-  border: none;
-  outline: none;
-  font-size: 15px;
-  background: transparent;
-  resize: none;
-  padding-top: 15px;
-  line-height: 1.5;
-}
-
-.note-content::placeholder {
-  color: #aaa;
-}
-
-.note-title::placeholder {
-  color: #bbb;
-}
-
-.save-status {
-  font-size: 13px;
-  color: #888;
-  margin-left: 10px;
-  transition: opacity 0.3s;
-}
-
-.save-status.saving {
-  color: #c49b00;
-  opacity: 1;
-}
-
-.save-status.saved {
-  color: #4caf50;
-  opacity: 1;
+.category-dropdown li button {
+  padding-left: 20px; /* Thụt vào cho rõ ràng hơn */
 }
