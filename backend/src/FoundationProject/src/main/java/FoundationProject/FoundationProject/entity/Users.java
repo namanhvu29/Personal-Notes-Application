@@ -21,7 +21,18 @@ public class Users {
     @Column(nullable = false, columnDefinition = "bit default 1")
     private boolean active = true;
 
+    @Column(length = 20)
+    private String role;
+
     // Getters và Setters
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     public int getUser_id() {
         return user_id;
     }
@@ -57,6 +68,7 @@ public class Users {
     public boolean isActive() {
         return active;
     }
+
     public void setActive(boolean active) {
         this.active = active;
     }
