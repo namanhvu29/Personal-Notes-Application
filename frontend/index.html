@@ -1,85 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Notes App Layout</title>
-  <link rel="stylesheet" href="css/style.css" />
+    <meta charset="UTF-8" />
+    <title>Notes App Layout</title>
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <div class="container">
+<div class="container">
     <!-- Sidebar -->
     <aside class="sidebar">
-      <input type="text" placeholder="Search..." class="search-box" />
-    
-      <!-- Gom 3 mục chính để căn đều -->
-      <div class="sections">
-        <section class="important-section">
-          <h3>Important</h3>
-          <ul id="importantList">
-            <li>Title 1</li>
-            <li>Title 2</li>
-          </ul>
-        </section>
-    
-        <section class="notes-section">
-          <div class="notes-header">
-            <h3>Notes</h3>
-            <button id="addNoteBtn">+ Add Note</button>
-          </div>
-          <ul id="notesList">
-            <li>Note 1</li>
-            <li>Note 2</li>
-          </ul>
-        </section>
-    
-        <section class="category-section">
-          <h3>Categorize</h3>
-          <ul id="categoryList">
-            <li>Category 1</li>
-            <li>Category 2</li>
-          </ul>
-        </section>
-      </div>
-    
-      <div class="settings">
-        <button class="settings-btn">⚙️</button>
-        <div class="settings-menu">
-          <button>Profile</button>
-          <button>Logout</button>
+        <input type="text" placeholder="Search..." class="search-box" id="searchBox" />
+
+        <!-- Gom 3 mục chính để căn đều -->
+        <div class="sections">
+            <section class="important-section">
+                <h3>Important</h3>
+                <ul id="importantList">
+                    <!-- Important notes will be rendered here -->
+                </ul>
+            </section>
+
+            <section class="notes-section">
+                <div class="notes-header">
+                    <h3>Notes</h3>
+                    <button id="addNoteBtn">+ Add Note</button>
+                </div>
+                <ul id="notesList">
+                    <!-- Notes list will be rendered here -->
+                </ul>
+            </section>
+
+            <section class="category-section">
+                <h3>Categorize</h3>
+                <ul id="categoryList">
+                    <li>Category 1</li>
+                    <li>Category 2</li>
+                </ul>
+            </section>
         </div>
-      </div>
+
+        <div class="settings">
+            <button class="settings-btn">⚙️</button>
+            <div class="settings-menu">
+                <button>Profile</button>
+                <button id="logoutBtn">Logout</button>
+            </div>
+        </div>
     </aside>
-    
 
     <!-- Main Content -->
     <main class="note-view" id="noteView">
-      <div class="note-header">
-        <input id="noteTitle" class="note-title" placeholder="Untitled Note...">
-        
-        <!-- ✅ Hiển thị trạng thái lưu -->
-        <span id="saveStatus" class="save-status">Saved</span>
-        
-        <div class="note-actions">
-          <button class="star-btn" id="starBtn">⭐
-            <span class="tooltip">Mark as Important</span>
-          </button>
-          <div class="dropdown">
-            <button class="menu-btn">⋮</button>
-            <div class="dropdown-content">
-              <button id="deleteBtn">Delete</button>
-              <button id="addToCategoryBtn">Add to Category</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-    
-      <textarea id="noteContent" class="note-content" placeholder="Start writing your note here..."></textarea>
-    </main>
-    
-  </div>
+        <div class="note-header">
+            <input id="noteTitle" class="note-title" placeholder="Untitled Note...">
 
-  <script src="/js/app.js"></script>
-  <script src="/js/auth.js"></script>
+            <!-- ✅ Hiển thị trạng thái lưu -->
+            <span id="saveStatus" class="save-status">Saved</span>
+
+            <div class="note-actions">
+                <div class="star-container">
+                    <button class="star-btn" id="starBtn">⭐</button>
+                    <span class="tooltip">Mark as Important</span>
+                </div>
+                <div class="dropdown">
+                    <button class="menu-btn">⋮</button>
+                    <div class="dropdown-content">
+                        <button id="deleteBtn">Delete</button>
+                        <button id="addToCategoryBtn">Add to Category</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <textarea id="noteContent" class="note-content" placeholder="Start writing your note here..."></textarea>
+    </main>
+</div>
+
+<script src="js/app.js"></script>
 </body>
 </html>
