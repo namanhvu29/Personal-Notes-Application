@@ -1,14 +1,3 @@
-// Khởi tạo danh sách người dùng mặc định
-let defaultUsers = [
-    { username: 'admin', email: 'admin@gmail.com', password: '123', role: 'admin' },
-    { username: 'user', email: 'user@gmail.com', password: '123', role: 'user' }
-// Khởi tạo danh sách người dùng mặc định
-let defaultUsers = [
-        { username: 'admin', email: 'admin@gmail.com', password: '123', role: 'admin' },
-        { username: 'user', email: 'user@gmail.com', password: '123', role: 'user' }
-    ];
-
-// Lấy danh sách user trong localStorage hoặc dùng mặc định
 // API URL
 const API_URL = 'http://localhost:8080/foundation';
 
@@ -76,7 +65,11 @@ if (loginForm) {
             errorMsg.innerText = 'Đăng nhập thành công! Đang chuyển hướng...';
 
             setTimeout(() => {
-                window.location.href = data.role === 'admin' ? 'admin.html' : 'index.html';
+                if (data.role === 'ADMIN') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
             }, 1000);
 
         } catch (error) {
@@ -180,7 +173,6 @@ if (window.location.pathname.includes('index.html')) {
         window.location.href = 'login.html';
     } else {
         console.log('✅ Đã đăng nhập, user:', currentUser.username);
-        // Có thể thêm logic verify token với backend ở đây nếu cần
     }
 }
 
