@@ -160,14 +160,22 @@ if (logoutBtn) {
     });
 }
 
-// ---- ĐĂNG XUẤT ----
-const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-if (currentUser && !window.location.href.includes('login.html') && !window.location.href.includes('register.html')) {
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) logoutBtn.onclick = ('logoutBtn') => {
-    localStorage.removeItem('currentUser');
-    window.location.href = 'login.html';
-  };
+// ========================================
+// KIỂM TRA ĐĂNG NHẬP KHI VÀO INDEX.HTML
+// ========================================
+if (window.location.pathname.includes('index.html')) {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+
+    console.log('=== CHECK LOGIN STATUS ===');
+    console.log('Current user:', currentUser);
+
+    if (!currentUser || !currentUser.user_id) {
+        console.log('❌ Chưa đăng nhập, redirect về login');
+        alert('Vui lòng đăng nhập trước!');
+        window.location.href = 'login.html';
+    } else {
+        console.log('✅ Đã đăng nhập, user_id:', currentUser.user_id);
+    }
 }
 
 // ========================================
