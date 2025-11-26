@@ -36,6 +36,9 @@ public class UsersController {
         }
     }
 
+    @Autowired
+    private FoundationProject.FoundationProject.security.JwtTokenProvider tokenProvider;
+
     // ĐĂNG NHẬP NGƯỜI DÙNG
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UsersLoginRequest request) {
@@ -49,7 +52,19 @@ public class UsersController {
                 return ResponseEntity.badRequest().body("Sai mật khẩu!");
             }
 
-            return ResponseEntity.ok("Đăng nhập thành công!");
+            // Generate Token
+            String token = tokenProvider.generateToken(user.getUsername(), user.getRole());
+
+            // Return token and user info
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("accessToken", token);
+            response.put("tokenType", "Bearer");
+            response.put("user_id", user.getUser_id());
+            response.put("username", user.getUsername());
+            response.put("email", user.getEmail());
+            response.put("role", user.getRole());
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Lỗi hệ thống: " + e.getMessage());
         }
