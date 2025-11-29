@@ -3,13 +3,18 @@ package FoundationProject.FoundationProject.service;
 import FoundationProject.FoundationProject.controller.UsersUpdateRequest;
 import FoundationProject.FoundationProject.dto.request.UsersCreationRequest;
 import FoundationProject.FoundationProject.dto.request.UsersRegisterRequest;
+import FoundationProject.FoundationProject.entity.PasswordResetToken;
 import FoundationProject.FoundationProject.entity.Users;
+import FoundationProject.FoundationProject.repository.PasswordResetTokenRepository;
 import FoundationProject.FoundationProject.repository.UsersRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 @Service
@@ -20,6 +25,12 @@ public class UsersService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private PasswordResetTokenRepository resetTokenRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     // ĐĂNG KÝ NGƯỜI DÙNG
     public void register(UsersRegisterRequest request) {
@@ -63,7 +74,7 @@ public class UsersService {
         return Pattern.compile(pattern).matcher(password).matches();
     }
 
-    //dang nhap
+    // dang nhap
     public Users findByUsernameOrEmail(String usernameOrEmail) {
         Users user = usersRepository.findByUsername(usernameOrEmail);
         if (user == null) {
@@ -72,6 +83,96 @@ public class UsersService {
         return user;
     }
 
+    // ========================================
+    // QUÊN MẬT KHẨU - GỬI MÃ RESET
+    // ========================================
+    @Transactional
+    public void sendResetCode(String email) {
+        // Kiểm tra email có tồn tại không
+        Users user = usersRepository.findByEmail(email);
+        if (user == null) {
+            throw new IllegalArgumentException("Email không tồn tại trong hệ thống!");
+        }
+
+        // Xóa các token cũ của email này
+        resetTokenRepository.deleteByEmail(email);
+
+        // Tạo mã ngẫu nhiên 6 chữ số
+        String resetCode = String.format("%06d", new Random().nextInt(999999));
+
+        // Lưu token vào database
+        PasswordResetToken token = new PasswordResetToken();
+        token.setEmail(email);
+        token.setResetCode(resetCode);
+        token.setExpiryDate(LocalDateTime.now().plusMinutes(10)); // Hết hạn sau 10 phút
+        token.setUsed(false);
+        resetTokenRepository.save(token);
+
+        // Gửi email
+        emailService.sendResetCode(email, resetCode);
+    }
+
+    // ========================================
+    // XÁC THỰC MÃ RESET
+    // ========================================
+    public boolean verifyResetCode(String email, String code) {
+        var tokenOpt = resetTokenRepository.findByEmailAndResetCodeAndUsedFalse(email, code);
+
+        if (tokenOpt.isEmpty()) {
+            return false;
+        }
+
+        PasswordResetToken token = tokenOpt.get();
+
+        // Kiểm tra xem token đã hết hạn chưa
+        if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    // ========================================
+    // ĐẶT LẠI MẬT KHẨU
+    // ========================================
+    @Transactional
+    public void resetPassword(String email, String code, String newPassword, String confirmPassword) {
+        // Kiểm tra mật khẩu khớp
+        if (!newPassword.equals(confirmPassword)) {
+            throw new IllegalArgumentException("Mật khẩu xác nhận không khớp!");
+        }
+
+        // Kiểm tra độ mạnh mật khẩu
+        if (!isValidPassword(newPassword)) {
+            throw new IllegalArgumentException("Mật khẩu phải ≥8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt!");
+        }
+
+        // Xác thực mã reset
+        var tokenOpt = resetTokenRepository.findByEmailAndResetCodeAndUsedFalse(email, code);
+        if (tokenOpt.isEmpty()) {
+            throw new IllegalArgumentException("Mã xác thực không hợp lệ!");
+        }
+
+        PasswordResetToken token = tokenOpt.get();
+
+        // Kiểm tra hết hạn
+        if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Mã xác thực đã hết hạn!");
+        }
+
+        // Cập nhật mật khẩu
+        Users user = usersRepository.findByEmail(email);
+        if (user == null) {
+            throw new IllegalArgumentException("Không tìm thấy người dùng!");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        usersRepository.save(user);
+
+        // Đánh dấu token đã sử dụng
+        token.setUsed(true);
+        resetTokenRepository.save(token);
+    }
 
     // CRUD
     public Users createUsers(UsersCreationRequest request) {
