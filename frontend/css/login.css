@@ -36,6 +36,14 @@ body {
   letter-spacing: 0.5px;
 }
 
+/* Mô tả form */
+.form-description {
+  text-align: center;
+  font-size: 13px !important;
+  color: #666 !important;
+  margin: -5px 0 5px 0 !important;
+}
+
 /* Input */
 .login-box input {
   padding: 12px;
@@ -68,6 +76,24 @@ body {
   transform: translateY(-1px);
 }
 
+.login-box button:disabled {
+  background: #ddd;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Nút gửi lại code */
+#resendCodeBtn {
+  background: #f0f0f0;
+  color: #666;
+  font-size: 14px;
+  margin-top: -5px;
+}
+
+#resendCodeBtn:not(:disabled):hover {
+  background: #e0e0e0;
+}
+
 /* Liên kết */
 .login-box p {
   text-align: center;
@@ -85,8 +111,20 @@ body {
   text-decoration: underline;
 }
 
+/* Link quên mật khẩu */
+.forgot-password-link {
+  margin-top: -10px !important;
+  margin-bottom: -5px !important;
+  text-align: right !important;
+}
+
+.forgot-password-link a {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
 /* Thông báo lỗi */
-#errorMsg, #registerMsg {
+#errorMsg, #registerMsg, #forgotMsg, #verifyMsg, #resetMsg {
   text-align: center;
   color: red;
   font-size: 14px;

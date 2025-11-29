@@ -617,7 +617,7 @@ function renderTrash() {
         restoreBtn.textContent = "↩️ Phục hồi";
         restoreBtn.classList.add('restore-btn');
         restoreBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
+            e.stopPropagation();git checkout search_categories_important
             restoreItem(index);
         });
 

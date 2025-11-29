@@ -2,15 +2,15 @@
 /* 1. ĐỊNH DẠNG CHUNG (Base Styles) */
 /* ========================================================= */
 body {
-  font-family: system-ui, sans-serif;
-  background-color: #fffdf5;
-  margin: 0;
-  padding: 0;
+    font-family: system-ui, sans-serif;
+    background-color: #fffdf5;
+    margin: 0;
+    padding: 0;
 }
 
 .container {
-  display: flex;
-  height: 100vh;
+    display: flex;
+    height: 100vh;
 }
 
 /* ========================================================= */
@@ -165,7 +165,7 @@ body {
 }
 
 #addNoteBtn:hover {
-  background: #ffcc00;
+    background: #ffcc00;
 }
 
 /* Danh sách Ghi chú và Quan trọng */
@@ -238,10 +238,11 @@ body {
 }
 
 .settings-btn {
-  font-size: 22px;
-  background: none;
-  border: none;
-  cursor: pointer;
+    font-size: 22px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
 }
 
 .settings-menu {
@@ -258,7 +259,7 @@ body {
 }
 
 .settings-menu.show {
-  display: block;
+    display: block;
 }
 
 .settings-menu button {
@@ -275,7 +276,7 @@ body {
 }
 
 .settings-menu button:hover {
-  background: #ffeb99;
+    background: #ffeb99;
 }
 
 /* ========================================================= */
@@ -420,8 +421,8 @@ body {
 
 /* ⭐ Nút Quan trọng + Tooltip */
 .star-container {
-  position: relative;
-  display: inline-block;
+    position: relative;
+    display: inline-block;
 }
 
 .star-btn {
@@ -448,38 +449,39 @@ body {
 /* ... */
 
 .tooltip {
-  visibility: hidden;
-  opacity: 0;
-  background-color: #333;
-  color: #fff;
-  font-size: 13px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  position: absolute;
-  top: -35px;
-  left: 50%;
-  transform: translateX(-50%);
-  white-space: nowrap;
-  transition: opacity 0.2s;
-  pointer-events: none;
-  z-index: 10;
+    visibility: hidden;
+    opacity: 0;
+    background-color: #333;
+    color: #fff;
+    font-size: 13px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    z-index: 10;
 }
 
 .star-container:hover .tooltip {
-  visibility: visible;
-  opacity: 1;
+    visibility: visible;
+    opacity: 1;
 }
 
 /* Dropdown Menu (⋮) */
 .dropdown {
-  position: relative;
+    position: relative;
 }
 
 .menu-btn {
-  font-size: 20px;
-  background: none;
-  border: none;
-  cursor: pointer;
+    font-size: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
 }
 
 .dropdown-content {
@@ -506,7 +508,7 @@ body {
 }
 
 .dropdown-content button:hover {
-  background: #ffeb99;
+    background: #ffeb99;
 }
 
 /* Dropdown chọn danh mục */
