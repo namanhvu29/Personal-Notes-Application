@@ -1,7 +1,7 @@
 // Khởi tạo ứng dụng trong một IIFE để tránh xung đột biến toàn cục
 (function() {
   "use strict";
-
+// new
   // =================================================================
   // 1. THAM CHIẾU ELEMENTS (Element References)
   // =================================================================
