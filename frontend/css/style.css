@@ -31,9 +31,9 @@ body {
   flex: 1; /* Chiếm hết không gian còn lại */
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly; 
+  justify-content: flex-start; 
   margin-top: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
 }
 
 .search-wrapper {
@@ -81,11 +81,11 @@ body {
   position: absolute; /* Đặt vị trí tuyệt đối so với sidebar (nếu sidebar là relative) */
 
   /* Căn chỉnh vị trí */
-  top: 55px;
+  top: 48px;
   left: 15px; /* Căn theo padding trái của sidebar */
   right: 15px; /* Căn theo padding phải của sidebar */
 
-  z-index: 10;
+  z-index: 1000;
 
   /* Xóa margin-top cũ vì giờ nó là absolute */
   margin-top: 0;
@@ -130,14 +130,33 @@ body {
 }
 
 /* Notes header (Ghi chú + Add button cùng hàng) */
-.notes-header {
+.notes-header, .category-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
+.category-header h3 {
+  margin-bottom: 0; /* Xóa margin dưới để nó thẳng hàng với nút */
+}
+
+/* Sửa style cho nút Add Category để giống nút Add Note */
+#addCategoryBtn {
+  /* Copy style từ #addNoteBtn */
+  background: #f7df87;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#addCategoryBtn:hover {
+  background: #ffcc00;
+}
+
 #addNoteBtn {
-  background: #ffd43b;
+  background: #f7df87;
   border: none;
   padding: 6px 10px;
   border-radius: 6px;
@@ -169,8 +188,7 @@ body {
   background-color: #ffeb99;
 }
 #notesList li.selected, #importantList li.selected {
-  font-weight: bold;
-  background-color: #ffd43b;
+  background-color: #ffeb99; /* Đặt nền trong suốt */
 }
 
 /* Danh mục (Category) */
@@ -190,13 +208,33 @@ body {
 .category-notes li:hover {
   background-color: #ffeb99;
 }
+/* 
+.trash-section {
+  background: #fffdf0;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 15px; 
+}
+
+.trash-section h3 {
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+#trashList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
 
 /* ========================================================= */
 /* 3. SETTINGS (Góc dưới Sidebar) */
 /* ========================================================= */
 .settings {
   position: relative;
-  align-self: flex-end;
+  align-self: flex-start;
 }
 
 .settings-btn {
@@ -216,6 +254,7 @@ body {
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 20; /* Đảm bảo menu hiển thị trên các element khác */
+  min-width: 150px;
 }
 
 .settings-menu.show {
@@ -223,9 +262,12 @@ body {
 }
 
 .settings-menu button {
-  display: block;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center; 
+  gap: 8px;
   width: 100%;
-  padding: 8px 16px;
+  padding: 8px 12px;
   background: none;
   border: none;
   text-align: left;
@@ -261,11 +303,57 @@ body {
   flex: 1; /* Cho phép nó chiếm không gian còn lại */
   display: flex;
   flex-direction: column;
+  position: relative;
   
   max-width: 700px; /* Chiều rộng tối đa mong muốn (có thể điều chỉnh) */
   margin: 0 auto; /* Căn giữa wrapper này */
   width: 100%; /* Đảm bảo nó chiếm max-width khi có thể */
   padding: 0 20px; /* Padding nhẹ bên trong wrapper */
+}
+
+/* Định dạng cho container menu Slash Command */
+.slash-menu-container {
+  display: none; /* Mặc định ẩn, hiện khi gõ '/' */
+  position: absolute;
+  z-index: 50; /* Cao hơn các element xung quanh */
+  background: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  width: 250px;
+  padding: 8px 0;
+  
+  /* Vị trí ban đầu (sẽ được JS điều chỉnh) */
+  left: 20px; 
+  top: 100px; 
+}
+
+.slash-menu-container.show {
+  display: block;
+}
+
+.slash-menu-container .menu-title {
+  font-size: 11px;
+  color: #999;
+  padding: 4px 15px;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+#slashList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#slashList li {
+  padding: 8px 15px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.1s;
+}
+
+#slashList li:hover {
+  background: #E8F5E9; /* Màu highlight xanh lá nhạt */
 }
 
 .note-title {
@@ -436,3 +524,97 @@ body {
 .category-dropdown li button {
   padding-left: 20px; /* Thụt vào cho rõ ràng hơn */
 }
+
+/* ========================================================= */
+/* 6. MODAL THÙNG RÁC (Popup Trash) */
+/* ========================================================= */
+.modal-overlay {
+  /* Mặc định ẩn, sẽ hiển thị bằng JS */
+  display: none; 
+  position: fixed; /* Neo vào viewport */
+  z-index: 1000; /* Đảm bảo nổi trên tất cả */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4); /* Nền mờ */
+  backdrop-filter: blur(3px); /* Hiệu ứng làm mờ nền */
+}
+
+.modal-overlay.show {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #fffef8;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 500px; /* Kích thước tối đa của cửa sổ */
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.close-btn {
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.close-btn:hover, .close-btn:focus {
+  color: #333;
+}
+
+/* Định dạng danh sách thùng rác (tương tự như style cũ) */
+.modal-trash-list {
+  list-style: none;
+  padding: 0;
+}
+
+.modal-trash-list li {
+  /* Style cho từng mục trash (giống như style bạn đã có) */
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Style cho các nút hành động (restore, delete-perm) và nút emptyTrashAllBtn */
+#emptyTrashAllBtn {
+  /* Style của nút Xóa Vĩnh Viễn Tất Cả */
+  width: 100%;
+  background: #ffc2c2;
+  color: #900;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+#emptyTrashAllBtn:hover {
+  background: #ff9999;
+}
+/* ... (Style cho restore-btn và delete-perm-btn trong list) ... */

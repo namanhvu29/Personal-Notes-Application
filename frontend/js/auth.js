@@ -88,7 +88,7 @@ if (registerForm) {
 const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
 if (currentUser && !window.location.href.includes('login.html') && !window.location.href.includes('register.html')) {
   const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) logoutBtn.onclick = () => {
+  if (logoutBtn) logoutBtn.onclick = ('logoutBtn') => {
     localStorage.removeItem('currentUser');
     window.location.href = 'login.html';
   };

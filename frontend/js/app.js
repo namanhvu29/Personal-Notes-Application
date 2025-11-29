@@ -31,6 +31,14 @@
       // Category Dropdown for Note Actions
       categoryDropdown: $("categoryDropdown"),
       addToCategoryBtn: $("addToCategoryBtn"),
+      // THAY ĐỔI: Thùng rác Modal
+        openTrashBtn: $("openTrashBtn"), // Nút mở thùng rác trong settings
+    trashModal: $("trashModal"),     // Modal Overlay
+    closeModalBtn: $("closeModalBtn"), // Nút đóng (X)
+    emptyTrashAllBtn: $("emptyTrashAllBtn"), // Nút Xóa tất cả
+    trashList: $("trashList"),       // Danh sách bên trong Modal
+    slashMenu: $("slashMenu"),
+    slashList: $("slashList"),
   };
 
   // =================================================================
@@ -38,6 +46,7 @@
   // =================================================================
   let notes = JSON.parse(localStorage.getItem("notes") || "[]");
   let categories = JSON.parse(localStorage.getItem("categories") || "[]"); 
+  let trash = JSON.parse(localStorage.getItem("trash") || "[]");
   let currentIndex = null;
   let saveTimeout = null;
   let isDropdownOpen = false; 
@@ -57,6 +66,19 @@
           setTimeout(() => { elements.saveStatus.textContent = ""; }, 2000);
       }
   }
+  /**
+ * Xóa Vĩnh Viễn tất cả các mục trong Thùng rác.
+ */
+function emptyTrash() {
+    if (trash.length === 0) return alert("Thùng rác trống.");
+
+    if (confirm(`Bạn có chắc chắn muốn XÓA VĨNH VIỄN ${trash.length} mục trong Thùng rác không?`)) {
+        trash = []; // Reset mảng thùng rác
+        persistData();
+        renderAll();
+        alert("Đã xóa vĩnh viễn Thùng rác.");
+    }
+}
 
   /**
    * Lưu dữ liệu vào Local Storage
@@ -64,6 +86,7 @@
   function persistData() {
       localStorage.setItem("notes", JSON.stringify(notes));
       localStorage.setItem("categories", JSON.stringify(categories));
+      localStorage.setItem("trash", JSON.stringify(trash));
   }
   
   // =================================================================
@@ -130,30 +153,66 @@
   /**
    * Xóa ghi chú đang mở.
    */
-  function deleteNote() {
-      if (currentIndex === null || notes[currentIndex] === undefined) {
-          return alert("Chọn note trước!");
-      }
-      if (!confirm(`Xóa ghi chú "${notes[currentIndex].title || 'Untitled'}"?`)) return;
+//   function deleteNote() {
+//       if (currentIndex === null || notes[currentIndex] === undefined) {
+//           return alert("Chọn note trước!");
+//       }
+//       if (!confirm(`Xóa ghi chú "${notes[currentIndex].title || 'Untitled'}"?`)) return;
 
-      notes.splice(currentIndex, 1);
+//       notes.splice(currentIndex, 1);
       
-      // Cập nhật lại index trong categories
-      categories.forEach(c => {
-          c.notes = c.notes
-              .filter(index => index !== currentIndex) 
-              .map(index => index > currentIndex ? index - 1 : index); 
-      });
+//       // Cập nhật lại index trong categories
+//       categories.forEach(c => {
+//           c.notes = c.notes
+//               .filter(index => index !== currentIndex) 
+//               .map(index => index > currentIndex ? index - 1 : index); 
+//       });
       
-      persistData();
+//       persistData();
 
-      currentIndex = null;
-      elements.noteTitle.value = "";
-      elements.noteContent.value = "";
+//       currentIndex = null;
+//       elements.noteTitle.value = "";
+//       elements.noteContent.value = "";
       
-      renderAll();
-      updateSaveStatus("saved");
-  }
+//       renderAll();
+//       updateSaveStatus("saved");
+//   }
+function deleteNote() {
+    if (currentIndex === null || notes[currentIndex] === undefined) {
+        return alert("Chọn note trước!");
+    }
+    if (!confirm(`Chuyển ghi chú "${notes[currentIndex].title || 'Untitled'}" vào Thùng rác?`)) return;
+
+    // Lấy note cần xóa
+    const noteToDelete = notes[currentIndex];
+    
+    // 🔑 THAY ĐỔI: Chuyển note vào mảng trash và gán type
+    trash.unshift({ 
+        type: 'note', 
+        data: noteToDelete, 
+        originalIndex: currentIndex // Giữ lại index cũ (tùy chọn)
+    });
+
+    // 🔑 XÓA: Xóa note khỏi mảng chính
+    notes.splice(currentIndex, 1);
+    
+    // Cập nhật lại index trong categories (Logic giữ nguyên)
+    categories.forEach(c => {
+        c.notes = c.notes
+            .filter(index => index !== currentIndex) 
+            .map(index => index > currentIndex ? index - 1 : index); 
+    });
+    
+    persistData();
+
+    // Đặt lại trạng thái
+    currentIndex = null;
+    elements.noteTitle.value = "";
+    elements.noteContent.value = "";
+    
+    renderAll();
+    updateSaveStatus("saved");
+}
 
   /**
    * Đánh dấu/Bỏ đánh dấu ghi chú là Quan trọng
@@ -181,7 +240,7 @@
       console.log("Search query:", query);
       console.log("Total notes:", notes.length);
       console.log("Notes data:", notes);
-
+    
       elements.searchResultsList.innerHTML = "";
       elements.searchResultsContainer.classList.remove("show");
 
@@ -226,6 +285,121 @@
 
       elements.searchResultsContainer.classList.add("show");
   }
+  /**
+ * Phục hồi mục đã xóa từ Thùng rác.
+ * @param {number} trashIndex - Index của mục trong mảng trash.
+ */
+function restoreItem(trashIndex) {
+    const itemToRestore = trash[trashIndex];
+    if (!itemToRestore) return;
+
+    if (itemToRestore.type === 'note') {
+        // Phục hồi Note: Thêm lại vào đầu mảng notes
+        notes.unshift(itemToRestore.data);
+        alert(`Đã phục hồi ghi chú: ${itemToRestore.data.title || 'Untitled'}`);
+    } else if (itemToRestore.type === 'category') {
+        // Phục hồi Category: Thêm lại vào đầu mảng categories
+        categories.unshift(itemToRestore.data);
+        alert(`Đã phục hồi danh mục: ${itemToRestore.data.name}`);
+    }
+
+    // Xóa khỏi thùng rác
+    trash.splice(trashIndex, 1);
+    
+    persistData();
+    renderAll();
+}
+/**
+ * Lấy vị trí con trỏ trong textarea.
+ */
+function getCursorPosition(el) {
+    return el.selectionStart;
+}
+
+/**
+ * Hiển thị/Ẩn menu Slash Command khi gõ '/'.
+ * @param {Event} e - Sự kiện gõ phím.
+ */
+function handleSlashCommand(e) {
+    const el = elements.noteContent;
+    const value = el.value;
+    const cursor = getCursorPosition(el);
+
+    // Lấy ký tự ngay trước con trỏ
+    const precedingChar = value.substring(cursor - 1, cursor);
+    
+    // // 1. Kiểm tra nếu gõ '/'
+    // if (e.key === '/') {
+    //     // Hiển thị menu tại vị trí con trỏ
+    //     elements.slashMenu.classList.add('show');
+        
+    //     // Vị trí (rất phức tạp với textarea, ta sẽ dùng vị trí tĩnh hoặc tương đối)
+    //     // Dùng vị trí tĩnh đơn giản:
+    //     elements.slashMenu.style.top = (e.target.offsetTop + 30) + 'px'; 
+    //     elements.slashMenu.style.left = '20px'; // Nằm bên trái textarea
+        
+    // } else if (e.key === 'Backspace' && value.substring(cursor - 2, cursor - 1) !== '/') {
+    //     // 2. Ẩn menu nếu Backspace và không phải xóa dấu '/'
+    //     elements.slashMenu.classList.remove('show');
+    // }
+    
+    // // 3. Ẩn menu nếu gõ bất kỳ ký tự nào khác sau dấu '/'
+    // if (elements.slashMenu.classList.contains('show') && e.key.length === 1 && e.key !== '/') {
+    //     // Bạn có thể thêm logic lọc list tại đây nếu cần (ví dụ: gõ /h thì lọc ra Heading)
+    // }
+    // 1. Kiểm tra nếu ký tự cuối cùng là '/'
+    if (value.endsWith('/')) {
+        // Hiển thị menu
+        elements.slashMenu.classList.add('show');
+        
+        // Cố gắng định vị menu gần con trỏ (cần CSS cho vị trí tương đối)
+        // Hiện tại, ta chỉ dùng vị trí tĩnh đã định nghĩa trong CSS
+        
+    } else {
+        // Nếu không phải '/', ẩn menu
+        elements.slashMenu.classList.remove('show');
+    }
+}
+
+
+/**
+ * Áp dụng định dạng (chèn cú pháp Markdown) khi chọn từ menu.
+ * @param {string} type - Loại định dạng (h1, bullet, todo, etc.)
+ */
+function applyFormatting(type) {
+    const el = elements.noteContent;
+    let prefix = '';
+    
+    switch (type) {
+        case 'h1':
+            prefix = '# ';
+            break;
+        case 'h2':
+            prefix = '## ';
+            break;
+        case 'bullet':
+            prefix = '* ';
+            break;
+        case 'number':
+            prefix = '1. ';
+            break;
+        case 'todo':
+            prefix = '- [ ] ';
+            break;
+        case 'separator':
+            prefix = '\n---\n'; //  Chèn dấu phân cách
+            break;
+        case 'text':
+        default:
+            prefix = '';
+    }
+
+    // Chèn prefix vào đầu dòng hiện tại (Đơn giản nhất là chèn vào đầu nội dung)
+    el.value = prefix + el.value; 
+
+    elements.slashMenu.classList.remove('show');
+    el.focus();
+}
 
 
   // =================================================================
@@ -235,29 +409,67 @@
   /**
    * Render danh sách ghi chú (Main Notes List)
    */
-  function renderNotes() {
-      elements.notesList.innerHTML = "";
-      
-      // Đảm bảo ẩn kết quả tìm kiếm khi danh sách chính được render
-      elements.searchResultsContainer.classList.remove("show");
+// function renderNotes() {
+//     elements.notesList.innerHTML = "";
+    
+//     // Đảm bảo ẩn kết quả tìm kiếm khi danh sách chính được render
+//     elements.searchResultsContainer.classList.remove("show");
 
-      if (notes.length === 0) {
-          elements.notesList.innerHTML = "<li style='color:#999'>Chưa có ghi chú</li>";
-          return;
-      }
+//     if (notes.length === 0) {
+//         elements.notesList.innerHTML = "<li style='color:#999'>Chưa có ghi chú</li>";
+//         return;
+//     }
 
-      notes.forEach((note, index) => {
-          const li = document.createElement("li");
-          li.textContent = note.title || "Untitled";
-          if (note.important) li.classList.add("important");
-          
-          // Highlight note đang được mở
-          if (index === currentIndex) li.classList.add("selected"); 
+//     notes.forEach((note, index) => {
+//         const li = document.createElement("li");
+//         li.textContent = note.title || "Untitled";
+//         if (note.important) li.classList.add("important");
+        
+//         // 🔑 ĐIỀU KIỆN SỬA LỖI: Chỉ highlight nếu note đang mở và KHÔNG phải là note rỗng (mới tạo)
+//         const isContentPresent = note.title.trim() !== '' || note.content.trim() !== '';
 
-          li.addEventListener("click", () => openNote(index));
-          elements.notesList.appendChild(li);
-      });
-  }
+//         if (index === currentIndex && isContentPresent) {
+//             li.classList.add("selected"); 
+//         } 
+
+//         li.addEventListener("click", () => openNote(index));
+//         elements.notesList.appendChild(li);
+//     });
+// }
+function renderNotes() {
+    elements.notesList.innerHTML = "";
+    
+    // Đảm bảo ẩn kết quả tìm kiếm khi danh sách chính được render (Đúng)
+    elements.searchResultsContainer.classList.remove("show");
+
+    // 🔑 BỔ SUNG: Đảm bảo khối sections luôn được hiển thị khi render danh sách chính
+    const sections = document.querySelector('.sections');
+    if (sections) sections.style.display = 'flex'; // Hiện lại sections
+
+    if (notes.length === 0) {
+        elements.notesList.innerHTML = "<li style='color:#999'>Chưa có ghi chú</li>";
+        return;
+    }
+
+    notes.forEach((note, index) => {
+        const li = document.createElement("li");
+        li.textContent = note.title || "Untitled";
+        if (note.important) li.classList.add("important");
+        
+        // Logic để không highlight note rỗng (từ sửa lỗi trước đó)
+        const isContentPresent = note.title.trim() !== '' || note.content.trim() !== '';
+
+        // 🔑 SỬA LỖI HIGHLIGHT: Áp dụng class "selected"
+        if (index === currentIndex && isContentPresent) {
+            li.classList.add("selected"); 
+        } 
+        
+        // Sự kiện click gọi openNote, sau đó openNote gọi renderAll (chứa renderNotes)
+        // Logic đã đúng, không cần thay đổi sự kiện click tại đây.
+        li.addEventListener("click", () => openNote(index));
+        elements.notesList.appendChild(li);
+    });
+}
   
   /**
    * Render danh sách ghi chú Quan trọng
@@ -364,6 +576,74 @@
       });
   }
 
+ /**
+ * Render danh sách Thùng rác (Trash List)
+ */
+function renderTrash() {
+    elements.trashList.innerHTML = "";
+    
+    if (trash.length === 0) {
+        elements.trashList.innerHTML = "<li style='color:#999'>Thùng rác trống</li>";
+        return;
+    }
+    
+    // Thêm nút Xóa Vĩnh Viễn Toàn bộ ở trên cùng
+    const emptyBtnLi = document.createElement("li");
+    const emptyBtn = document.createElement("button");
+    emptyBtn.textContent = "🗑️ Xóa Vĩnh Viễn Tất Cả";
+    emptyBtn.classList.add("empty-trash-btn");
+    emptyBtn.addEventListener('click', emptyTrash);
+    emptyBtnLi.appendChild(emptyBtn);
+    elements.trashList.appendChild(emptyBtnLi);
+
+
+    trash.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.classList.add('trash-item');
+
+        const name = item.data.title || item.data.name || "Mục không tên";
+        
+        // Vùng chứa tên và nút
+        const itemContainer = document.createElement("div");
+        itemContainer.classList.add('trash-item-container');
+        itemContainer.innerHTML = `<span>[${item.type.charAt(0).toUpperCase()}] ${name}</span>`;
+
+        // Vùng chứa các nút hành động
+        const actions = document.createElement("div");
+        actions.classList.add('trash-item-actions');
+
+        // Nút Phục hồi
+        const restoreBtn = document.createElement("button");
+        restoreBtn.textContent = "↩️ Phục hồi";
+        restoreBtn.classList.add('restore-btn');
+        restoreBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            restoreItem(index);
+        });
+
+        // Nút Xóa Vĩnh Viễn riêng lẻ
+        const deletePermBtn = document.createElement("button");
+        deletePermBtn.textContent = "❌ Xóa";
+        deletePermBtn.classList.add('delete-perm-btn');
+        deletePermBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (confirm(`Xóa vĩnh viễn mục "${name}"?`)) {
+                 // Xóa khỏi mảng trash (chỉ đơn giản là splice)
+                trash.splice(index, 1);
+                persistData();
+                renderAll();
+            }
+        });
+        
+        actions.appendChild(restoreBtn);
+        actions.appendChild(deletePermBtn);
+        
+        li.appendChild(itemContainer);
+        li.appendChild(actions);
+        elements.trashList.appendChild(li);
+    });
+}
+
   /**
    * Hàm tổng hợp render tất cả list trong Sidebar
    */
@@ -371,6 +651,7 @@
       renderNotes();
       renderImportantList();
       renderCategories();
+      
   }
 
 
@@ -413,13 +694,33 @@
   /**
    * Xử lý xóa danh mục
    */
+//   function handleDeleteCategory(name, index) {
+//       if (confirm(`Xóa danh mục "${name}"? Thao tác này KHÔNG xóa ghi chú bên trong.`)) {
+//           categories.splice(index, 1);
+//           persistData();
+//           renderCategories();
+//       }
+//   }
   function handleDeleteCategory(name, index) {
-      if (confirm(`Xóa danh mục "${name}"? Thao tác này KHÔNG xóa ghi chú bên trong.`)) {
-          categories.splice(index, 1);
-          persistData();
-          renderCategories();
-      }
-  }
+    if (confirm(`Chuyển danh mục "${name}" vào Thùng rác? Thao tác này KHÔNG xóa ghi chú bên trong.`)) {
+        
+        // Lấy category cần xóa
+        const categoryToDelete = categories[index];
+        
+        // 🔑 THAY ĐỔI: Chuyển category vào mảng trash
+        trash.unshift({ 
+            type: 'category', 
+            data: categoryToDelete 
+        });
+
+        // 🔑 XÓA: Xóa category khỏi mảng chính
+        categories.splice(index, 1);
+        
+        persistData();
+        renderCategories();
+        renderTrash(); // Gọi hàm render thùng rác
+    }
+}
 
   /**
    * Thêm ghi chú đang mở vào một danh mục
@@ -458,7 +759,42 @@
       elements.starBtn.addEventListener("click", toggleImportant);
       elements.deleteBtn.addEventListener("click", deleteNote);
       elements.addCategoryBtn.addEventListener("click", handleAddCategory);
-      
+      elements.noteContent.addEventListener('input', handleSlashCommand);
+    // 🔑 THÊM MỚI: Lắng nghe click từ menu
+    elements.slashList.addEventListener('click', (e) => {
+        const li = e.target.closest('li');
+        if (li && li.dataset.type) {
+            applyFormatting(li.dataset.type);
+        }
+    });
+    // 🔑 LOGIC MODAL THÙNG RÁC
+    
+    // Mở Modal
+    elements.openTrashBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        elements.trashModal.classList.add('show');
+        renderTrash(); // Render danh sách mỗi khi mở
+        
+        // Đóng Settings Menu khi mở Modal
+        document.querySelector('.settings-menu').classList.remove('show');
+    });
+
+    // Đóng Modal (Nút X)
+    elements.closeModalBtn.addEventListener('click', () => {
+        elements.trashModal.classList.remove('show');
+    });
+
+    // Đóng Modal (Click bên ngoài)
+    elements.trashModal.addEventListener('click', (e) => {
+        // Nếu click chính xác vào modal-overlay (không phải modal-content)
+        if (e.target.id === 'trashModal') {
+            elements.trashModal.classList.remove('show');
+        }
+    });
+
+    // Sự kiện cho nút Xóa Vĩnh Viễn Toàn bộ
+    elements.emptyTrashAllBtn.addEventListener('click', emptyTrash);
+
       // 🔎 Tìm kiếm
       elements.searchBox.addEventListener("input", searchNotes);
       
@@ -501,6 +837,10 @@
             
             elements.searchResultsContainer.classList.remove("show");
         } 
+        // 🔑 Logic ẩn Slash Menu
+        if (!elements.noteContent.contains(e.target) && !elements.slashMenu.contains(e.target)) {
+            elements.slashMenu.classList.remove('show');
+        }
       });
   }
 
