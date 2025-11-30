@@ -1,7 +1,5 @@
 package FoundationProject.FoundationProject.dto.request;
 
-
-
 public class UsersLoginRequest {
     private String usernameOrEmail;
     private String password;

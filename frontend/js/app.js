@@ -1,9 +1,9 @@
-// Khởi tạo ứng dụng trong một IIFE để tránh xung đột biến toàn cục
+// Khởi tạo ứng dụng
 (function() {
     "use strict";
 
     // =================================================================
-    // 1. THAM CHIẾU ELEMENTS (Element References)
+    // 1. THAM CHIẾU ELEMENTS
     // =================================================================
     const $ = selector => document.getElementById(selector);
 
@@ -34,22 +34,19 @@
     };
 
     // =================================================================
-    // 2. TRẠNG THÁI VÀ DỮ LIỆU (State and Data)
+    // 2. STATE VÀ DỮ LIỆU
     // =================================================================
-    let notes = []; // ❌ KHÔNG dùng localStorage nữa, lấy từ API
+    let notes = []; // ✅ Lấy từ API
     let categories = JSON.parse(localStorage.getItem("categories") || "[]");
     let trash = JSON.parse(localStorage.getItem("trash") || "[]");
-    let currentNote = null; // Lưu note đang mở (object từ API)
+    let currentNote = null; // ✅ Lưu note object từ API
     let saveTimeout = null;
     let isDropdownOpen = false;
 
     // =================================================================
-    // 3. HÀM TIỆN ÍCH (Utility Functions)
+    // 3. UTILITY FUNCTIONS
     // =================================================================
 
-    /**
-     * Cập nhật trạng thái lưu
-     */
     function updateSaveStatus(status) {
         elements.saveStatus.textContent = status === "saving" ? "Đang lưu..." : "Đã lưu";
         elements.saveStatus.classList.remove("saving", "saved");
@@ -59,20 +56,17 @@
         }
     }
 
-    /**
-     * Lưu dữ liệu categories và trash vào Local Storage
-     */
     function persistData() {
         localStorage.setItem("categories", JSON.stringify(categories));
         localStorage.setItem("trash", JSON.stringify(trash));
     }
 
     // =================================================================
-    // 4. LOGIC GHI CHÚ - TÍCH HỢP API (Note Logic with API)
+    // 4. NOTE LOGIC - API INTEGRATION
     // =================================================================
 
     /**
-     * Tải tất cả notes từ Backend
+     * ✅ Tải notes từ Backend API
      */
     async function loadNotesFromAPI() {
         try {
@@ -80,25 +74,21 @@
             elements.notesList.innerHTML = "<li style='color:#999'>Đang tải...</li>";
 
             notes = await window.NotesAPI.getNotes();
-            console.log('✅ Đã tải notes từ API:', notes.length);
+            console.log('✅ Loaded notes:', notes.length);
 
             renderAll();
             updateSaveStatus("saved");
 
-            // Tự động mở note đầu tiên
             if (notes.length > 0) {
                 openNote(notes[0]);
             }
         } catch (error) {
-            console.error('❌ Lỗi tải notes:', error);
-            elements.notesList.innerHTML = "<li style='color:red'>Lỗi kết nối server</li>";
+            console.error('❌ Load notes error:', error);
+            elements.notesList.innerHTML = "<li style='color:red'>Lỗi kết nối</li>";
             updateSaveStatus("saved");
         }
     }
 
-    /**
-     * Mở một ghi chú trong Main View
-     */
     function openNote(note) {
         if (!note) return;
 
@@ -107,20 +97,18 @@
         elements.noteTitle.value = note.title || '';
         elements.noteContent.value = note.content || '';
 
-        // ⭐ Logic Ngôi sao
         elements.starBtn.classList.toggle("active", note.is_important);
         elements.starBtn.textContent = note.is_important ? "⭐" : "☆";
 
-        // Đóng dropdown menu
         document.querySelector('.dropdown-content').style.display = 'none';
         isDropdownOpen = false;
 
         updateSaveStatus("saved");
-        renderNotes(); // Cập nhật highlight
+        renderNotes();
     }
 
     /**
-     * Tạo một ghi chú mới
+     * ✅ Tạo note mới qua API
      */
     async function createNote() {
         try {
@@ -132,9 +120,8 @@
                 important: false
             });
 
-            console.log('✅ Đã tạo note mới:', newNote);
+            console.log('✅ Created note:', newNote.note_id);
 
-            // Thêm vào đầu mảng
             notes.unshift(newNote);
 
             renderAll();
@@ -143,14 +130,14 @@
 
             updateSaveStatus("saved");
         } catch (error) {
-            console.error('❌ Lỗi tạo note:', error);
+            console.error('❌ Create note error:', error);
             alert('Lỗi tạo ghi chú: ' + error.message);
             updateSaveStatus("saved");
         }
     }
 
     /**
-     * Lưu tự động (debounce) khi người dùng gõ
+     * ✅ Auto save qua API
      */
     function autoSave() {
         if (!currentNote) {
@@ -165,21 +152,18 @@
 
         saveTimeout = setTimeout(async () => {
             try {
-                // Gọi API cập nhật
                 const updated = await window.NotesAPI.updateNote(currentNote.note_id, {
                     title: updatedTitle,
                     content: updatedContent,
                     is_important: currentNote.is_important
                 });
 
-                console.log('✅ Đã lưu note:', updated);
+                console.log('✅ Saved note:', updated.note_id);
 
-                // Cập nhật object hiện tại
                 currentNote.title = updated.title;
                 currentNote.content = updated.content;
                 currentNote.updated_at = updated.updated_at;
 
-                // Cập nhật trong mảng notes
                 const index = notes.findIndex(n => n.note_id === currentNote.note_id);
                 if (index !== -1) {
                     notes[index] = currentNote;
@@ -188,15 +172,15 @@
                 renderAll();
                 updateSaveStatus("saved");
             } catch (error) {
-                console.error('❌ Lỗi lưu note:', error);
-                alert('Lỗi lưu ghi chú: ' + error.message);
+                console.error('❌ Save error:', error);
+                alert('Lỗi lưu: ' + error.message);
                 updateSaveStatus("saved");
             }
         }, 800);
     }
 
     /**
-     * Xóa ghi chú đang mở
+     * ✅ Xóa note qua API
      */
     async function deleteNote() {
         if (!currentNote) {
@@ -208,36 +192,32 @@
         try {
             updateSaveStatus("saving");
 
-            // Gọi API xóa
             await window.NotesAPI.deleteNote(currentNote.note_id);
 
-            console.log('✅ Đã xóa note:', currentNote.note_id);
+            console.log('✅ Deleted note:', currentNote.note_id);
 
-            // Xóa khỏi mảng local
             notes = notes.filter(n => n.note_id !== currentNote.note_id);
 
-            // Đặt lại trạng thái
             currentNote = null;
             elements.noteTitle.value = "";
             elements.noteContent.value = "";
 
             renderAll();
 
-            // Tự động mở note tiếp theo nếu còn
             if (notes.length > 0) {
                 openNote(notes[0]);
             }
 
             updateSaveStatus("saved");
         } catch (error) {
-            console.error('❌ Lỗi xóa note:', error);
-            alert('Lỗi xóa ghi chú: ' + error.message);
+            console.error('❌ Delete error:', error);
+            alert('Lỗi xóa: ' + error.message);
             updateSaveStatus("saved");
         }
     }
 
     /**
-     * Đánh dấu/Bỏ đánh dấu ghi chú là Quan trọng
+     * ✅ Toggle important qua API
      */
     async function toggleImportant() {
         if (!currentNote) return alert("Chọn note trước!");
@@ -245,39 +225,36 @@
         try {
             updateSaveStatus("saving");
 
-            const newImportantStatus = !currentNote.is_important;
+            const newStatus = !currentNote.is_important;
 
-            // Gọi API cập nhật
             const updated = await window.NotesAPI.updateNote(currentNote.note_id, {
                 title: currentNote.title,
                 content: currentNote.content,
-                is_important: newImportantStatus
+                is_important: newStatus
             });
 
-            console.log('✅ Đã cập nhật trạng thái quan trọng:', updated);
+            console.log('✅ Updated important:', updated.note_id);
 
-            // Cập nhật UI
-            currentNote.is_important = newImportantStatus;
-            elements.starBtn.classList.toggle("active", newImportantStatus);
-            elements.starBtn.textContent = newImportantStatus ? "⭐" : "☆";
+            currentNote.is_important = newStatus;
+            elements.starBtn.classList.toggle("active", newStatus);
+            elements.starBtn.textContent = newStatus ? "⭐" : "☆";
 
-            // Cập nhật trong mảng notes
             const index = notes.findIndex(n => n.note_id === currentNote.note_id);
             if (index !== -1) {
-                notes[index].is_important = newImportantStatus;
+                notes[index].is_important = newStatus;
             }
 
             renderAll();
             updateSaveStatus("saved");
         } catch (error) {
-            console.error('❌ Lỗi cập nhật trạng thái quan trọng:', error);
+            console.error('❌ Toggle important error:', error);
             alert('Lỗi: ' + error.message);
             updateSaveStatus("saved");
         }
     }
 
     /**
-     * 🔎 Tìm kiếm ghi chú trực tiếp
+     * ✅ Search qua API
      */
     async function searchNotes() {
         const query = elements.searchBox.value.toLowerCase().trim();
@@ -285,15 +262,12 @@
         elements.searchResultsList.innerHTML = "";
         elements.searchResultsContainer.classList.remove("show");
 
-        if (!query) {
-            return;
-        }
+        if (!query) return;
 
         try {
-            // Gọi API tìm kiếm
             const results = await window.NotesAPI.searchNotes(query);
 
-            console.log('🔍 Kết quả tìm kiếm:', results.length);
+            console.log('🔍 Search results:', results.length);
 
             if (results.length === 0) {
                 elements.searchResultsList.innerHTML = `<li style='color:#999'>Không tìm thấy.</li>`;
@@ -301,7 +275,6 @@
                 return;
             }
 
-            // Render kết quả
             results.forEach(note => {
                 const li = document.createElement("li");
                 li.textContent = note.title || "Untitled";
@@ -318,22 +291,18 @@
 
             elements.searchResultsContainer.classList.add("show");
         } catch (error) {
-            console.error('❌ Lỗi tìm kiếm:', error);
+            console.error('❌ Search error:', error);
             elements.searchResultsList.innerHTML = `<li style='color:red'>Lỗi tìm kiếm</li>`;
             elements.searchResultsContainer.classList.add("show");
         }
     }
 
     // =================================================================
-    // 5. LOGIC RENDER (Rendering Logic)
+    // 5. RENDER LOGIC
     // =================================================================
 
-    /**
-     * Render danh sách ghi chú
-     */
     function renderNotes() {
         elements.notesList.innerHTML = "";
-
         elements.searchResultsContainer.classList.remove("show");
 
         if (notes.length === 0) {
@@ -346,7 +315,6 @@
             li.textContent = note.title || "Untitled";
             if (note.is_important) li.classList.add("important");
 
-            // Highlight note đang mở
             if (currentNote && note.note_id === currentNote.note_id) {
                 li.classList.add("selected");
             }
@@ -356,9 +324,6 @@
         });
     }
 
-    /**
-     * Render danh sách ghi chú Quan trọng
-     */
     function renderImportantList() {
         elements.importantList.innerHTML = "";
         const importantNotes = notes.filter(n => n.is_important);
@@ -376,15 +341,12 @@
         });
     }
 
-    /**
-     * Render danh sách danh mục
-     */
     function renderCategories() {
         elements.categoryList.innerHTML = "";
         elements.categoryDropdown.innerHTML = "";
 
         if (categories.length === 0) {
-            elements.categoryList.innerHTML = "<li style='color:#999'>Chưa có danh mục nào</li>";
+            elements.categoryList.innerHTML = "<li style='color:#999'>Chưa có danh mục</li>";
             elements.categoryDropdown.innerHTML = "<li>Không có danh mục</li>";
             return;
         }
@@ -453,9 +415,6 @@
         });
     }
 
-    /**
-     * Render danh sách Thùng rác
-     */
     function renderTrash() {
         elements.trashList.innerHTML = "";
 
@@ -490,7 +449,7 @@
             deletePermBtn.classList.add('delete-perm-btn');
             deletePermBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (confirm(`Xóa vĩnh viễn mục "${name}"?`)) {
+                if (confirm(`Xóa vĩnh viễn "${name}"?`)) {
                     trash.splice(index, 1);
                     persistData();
                     renderTrash();
@@ -507,12 +466,12 @@
     }
 
     function restoreItem(trashIndex) {
-        const itemToRestore = trash[trashIndex];
-        if (!itemToRestore) return;
+        const item = trash[trashIndex];
+        if (!item) return;
 
-        if (itemToRestore.type === 'category') {
-            categories.unshift(itemToRestore.data);
-            alert(`Đã phục hồi danh mục: ${itemToRestore.data.name}`);
+        if (item.type === 'category') {
+            categories.unshift(item.data);
+            alert(`Đã phục hồi: ${item.data.name}`);
         }
 
         trash.splice(trashIndex, 1);
@@ -523,17 +482,14 @@
     function emptyTrash() {
         if (trash.length === 0) return alert("Thùng rác trống.");
 
-        if (confirm(`Bạn có chắc chắn muốn XÓA VĨNH VIỄN ${trash.length} mục trong Thùng rác không?`)) {
+        if (confirm(`Xóa vĩnh viễn ${trash.length} mục?`)) {
             trash = [];
             persistData();
             renderTrash();
-            alert("Đã xóa vĩnh viễn Thùng rác.");
+            alert("Đã xóa.");
         }
     }
 
-    /**
-     * Hàm tổng hợp render tất cả
-     */
     function renderAll() {
         renderNotes();
         renderImportantList();
@@ -541,29 +497,29 @@
     }
 
     // =================================================================
-    // 6. LOGIC DANH MỤC (Category Logic)
+    // 6. CATEGORY LOGIC
     // =================================================================
 
     function handleAddCategory() {
-        const catName = prompt("Tên danh mục mới:");
+        const catName = prompt("Tên danh mục:");
         if (!catName) return;
 
-        const trimmedName = catName.trim();
-        if (!trimmedName) return;
+        const trimmed = catName.trim();
+        if (!trimmed) return;
 
-        if (categories.find(c => c.name === trimmedName)) {
+        if (categories.find(c => c.name === trimmed)) {
             return alert("Danh mục đã tồn tại!");
         }
 
-        categories.push({ name: trimmedName, notes: [] });
+        categories.push({ name: trimmed, notes: [] });
         persistData();
         renderCategories();
     }
 
     function handleDeleteCategory(name, index) {
-        if (confirm(`Chuyển danh mục "${name}" vào Thùng rác?`)) {
-            const categoryToDelete = categories[index];
-            trash.unshift({ type: 'category', data: categoryToDelete });
+        if (confirm(`Xóa danh mục "${name}"?`)) {
+            const cat = categories[index];
+            trash.unshift({ type: 'category', data: cat });
             categories.splice(index, 1);
             persistData();
             renderCategories();
@@ -582,9 +538,9 @@
             cat.notes.push(currentNote.note_id);
             persistData();
             renderCategories();
-            alert(`Đã thêm note vào "${cat.name}"`);
+            alert(`Đã thêm vào "${cat.name}"`);
         } else {
-            alert("Note đã có trong danh mục này!");
+            alert("Đã có trong danh mục!");
         }
         elements.categoryDropdown.parentElement.style.display = 'none';
         isDropdownOpen = false;
@@ -625,7 +581,7 @@
     }
 
     // =================================================================
-    // 8. SỰ KIỆN VÀ KHỞI TẠO (Events and Initialization)
+    // 8. EVENT LISTENERS
     // =================================================================
 
     function setupEventListeners() {
@@ -701,29 +657,28 @@
         });
     }
 
-    /**
-     * Khởi chạy ứng dụng
-     */
-    async function init() {
-        console.log("🚀 Initializing app with API integration...");
+    // =================================================================
+    // 9. INITIALIZATION
+    // =================================================================
 
-        // Kiểm tra đăng nhập
+    async function init() {
+        console.log("🚀 Initializing with API...");
+
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         if (!currentUser) {
-            console.log('❌ Chưa đăng nhập, chuyển hướng...');
+            console.log('❌ Not logged in');
             window.location.href = 'login.html';
             return;
         }
 
-        console.log('✅ User logged in:', currentUser.username);
+        console.log('✅ User:', currentUser.username);
 
         setupEventListeners();
 
-        // ✅ QUAN TRỌNG: Load notes từ API thay vì localStorage
+        // ✅ Load từ API
         await loadNotesFromAPI();
     }
 
-    // Khởi động
     init();
 
 })();
