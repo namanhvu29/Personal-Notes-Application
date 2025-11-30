@@ -29,6 +29,18 @@ spring:
         format_sql: true
         default_schema: dbo   # Set schema đúng với DB
     show-sql: true
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 587
+    username: c8780cd2aa9a87
+    password: 31095747db9c5d
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: false
 
 ---
 
@@ -51,3 +63,15 @@ spring:
       hibernate:
         default_schema: dbo
     show-sql: false
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 587
+    username: c8780cd2aa9a87
+    password: 31095747db9c5d
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: false
