@@ -161,6 +161,262 @@ if (logoutBtn) {
 }
 
 // ========================================
+// QUÊN MẬT KHẨU - 3 BƯỚC
+// ========================================
+
+let currentEmail = ''; // Lưu email để dùng cho các bước sau
+let resendTimer = null;
+
+// Hiển thị form quên mật khẩu
+const showForgotPasswordLink = document.getElementById('showForgotPassword');
+if (showForgotPasswordLink) {
+    showForgotPasswordLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('forgotPasswordForm').style.display = 'block';
+    });
+}
+
+// Quay lại đăng nhập
+const backToLoginBtns = document.querySelectorAll('[id^="backToLogin"]');
+backToLoginBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Ẩn tất cả các form
+        document.getElementById('forgotPasswordForm').style.display = 'none';
+        document.getElementById('verifyCodeForm').style.display = 'none';
+        document.getElementById('resetPasswordForm').style.display = 'none';
+        // Hiện form login
+        document.getElementById('loginForm').style.display = 'block';
+        // Clear messages
+        document.getElementById('forgotMsg').innerText = '';
+        document.getElementById('verifyMsg').innerText = '';
+        document.getElementById('resetMsg').innerText = '';
+    });
+});
+
+// BƯỚC 1: Gửi email
+const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+if (forgotPasswordForm) {
+    forgotPasswordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('resetEmail').value.trim();
+        const forgotMsg = document.getElementById('forgotMsg');
+
+        if (!email) {
+            forgotMsg.style.color = 'red';
+            forgotMsg.innerText = 'Vui lòng nhập email!';
+            return;
+        }
+
+        forgotMsg.innerText = 'Đang gửi mã xác thực...';
+        forgotMsg.style.color = '#999';
+
+        try {
+            const response = await fetch(`${API_URL}/users/forgot-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+            });
+
+            const result = await response.text();
+
+            if (!response.ok) {
+                forgotMsg.style.color = 'red';
+                forgotMsg.innerText = result;
+                return;
+            }
+
+            // Thành công - lưu email và chuyển sang bước 2
+            currentEmail = email;
+            forgotMsg.style.color = 'green';
+            forgotMsg.innerText = result;
+
+            setTimeout(() => {
+                document.getElementById('forgotPasswordForm').style.display = 'none';
+                document.getElementById('verifyCodeForm').style.display = 'block';
+                startResendTimer(); // Bắt đầu đếm ngược 60s
+            }, 1000);
+
+        } catch (error) {
+            console.error('❌ Forgot password error:', error);
+            forgotMsg.style.color = 'red';
+            forgotMsg.innerText = 'Lỗi kết nối server!';
+        }
+    });
+}
+
+// Hàm đếm ngược để gửi lại mã
+function startResendTimer() {
+    let countdown = 60;
+    const resendBtn = document.getElementById('resendCodeBtn');
+    resendBtn.disabled = true;
+
+    resendTimer = setInterval(() => {
+        countdown--;
+        resendBtn.innerText = `Gửi lại mã (${countdown}s)`;
+
+        if (countdown <= 0) {
+            clearInterval(resendTimer);
+            resendBtn.disabled = false;
+            resendBtn.innerText = 'Gửi lại mã';
+        }
+    }, 1000);
+}
+
+// Nút gửi lại mã
+const resendCodeBtn = document.getElementById('resendCodeBtn');
+if (resendCodeBtn) {
+    resendCodeBtn.addEventListener('click', async () => {
+        const verifyMsg = document.getElementById('verifyMsg');
+        verifyMsg.innerText = 'Đang gửi lại mã...';
+        verifyMsg.style.color = '#999';
+
+        try {
+            const response = await fetch(`${API_URL}/users/forgot-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: currentEmail })
+            });
+
+            const result = await response.text();
+
+            if (!response.ok) {
+                verifyMsg.style.color = 'red';
+                verifyMsg.innerText = result;
+                return;
+            }
+
+            verifyMsg.style.color = 'green';
+            verifyMsg.innerText = 'Mã mới đã được gửi!';
+            startResendTimer();
+
+        } catch (error) {
+            verifyMsg.style.color = 'red';
+            verifyMsg.innerText = 'Lỗi kết nối server!';
+        }
+    });
+}
+
+// BƯỚC 2: Xác thực mã
+const verifyCodeForm = document.getElementById('verifyCodeForm');
+if (verifyCodeForm) {
+    verifyCodeForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const code = document.getElementById('verifyCode').value.trim();
+        const verifyMsg = document.getElementById('verifyMsg');
+
+        if (!code || code.length !== 6) {
+            verifyMsg.style.color = 'red';
+            verifyMsg.innerText = 'Vui lòng nhập mã 6 số!';
+            return;
+        }
+
+        verifyMsg.innerText = 'Đang xác thực...';
+        verifyMsg.style.color = '#999';
+
+        try {
+            const response = await fetch(`${API_URL}/users/verify-code`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: currentEmail,
+                    code: code
+                })
+            });
+
+            const result = await response.text();
+
+            if (!response.ok) {
+                verifyMsg.style.color = 'red';
+                verifyMsg.innerText = result;
+                return;
+            }
+
+            // Thành công - chuyển sang bước 3
+            verifyMsg.style.color = 'green';
+            verifyMsg.innerText = result;
+
+            setTimeout(() => {
+                document.getElementById('verifyCodeForm').style.display = 'none';
+                document.getElementById('resetPasswordForm').style.display = 'block';
+                // Lưu code để dùng cho bước 3
+                document.getElementById('resetPasswordForm').dataset.code = code;
+            }, 1000);
+
+        } catch (error) {
+            console.error('❌ Verify code error:', error);
+            verifyMsg.style.color = 'red';
+            verifyMsg.innerText = 'Lỗi kết nối server!';
+        }
+    });
+}
+
+// BƯỚC 3: Đặt lại mật khẩu
+const resetPasswordForm = document.getElementById('resetPasswordForm');
+if (resetPasswordForm) {
+    resetPasswordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const newPassword = document.getElementById('newPassword').value.trim();
+        const confirmPassword = document.getElementById('confirmNewPassword').value.trim();
+        const resetMsg = document.getElementById('resetMsg');
+        const code = resetPasswordForm.dataset.code;
+
+        if (!newPassword || !confirmPassword) {
+            resetMsg.style.color = 'red';
+            resetMsg.innerText = 'Vui lòng nhập đầy đủ thông tin!';
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            resetMsg.style.color = 'red';
+            resetMsg.innerText = 'Mật khẩu xác nhận không khớp!';
+            return;
+        }
+
+        resetMsg.innerText = 'Đang đặt lại mật khẩu...';
+        resetMsg.style.color = '#999';
+
+        try {
+            const response = await fetch(`${API_URL}/users/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: currentEmail,
+                    code: code,
+                    newPassword: newPassword,
+                    confirmPassword: confirmPassword
+                })
+            });
+
+            const result = await response.text();
+
+            if (!response.ok) {
+                resetMsg.style.color = 'red';
+                resetMsg.innerText = result;
+                return;
+            }
+
+            // Thành công - chuyển về login
+            resetMsg.style.color = 'green';
+            resetMsg.innerText = result + ' Đang chuyển về đăng nhập...';
+
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+
+        } catch (error) {
+            console.error('❌ Reset password error:', error);
+            resetMsg.style.color = 'red';
+            resetMsg.innerText = 'Lỗi kết nối server!';
+        }
+    });
+}
+
+// ========================================
 // KIỂM TRA ĐĂNG NHẬP KHI VÀO INDEX.HTML
 // ========================================
 if (window.location.pathname.includes('index.html')) {
