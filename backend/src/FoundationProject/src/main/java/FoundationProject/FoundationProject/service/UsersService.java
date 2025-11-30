@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 @Service
-public class UsersService {
+public class UsersService implements org.springframework.security.core.userdetails.UserDetailsService {
 
     @Autowired
     private UsersRepository usersRepository;
@@ -54,6 +54,7 @@ public class UsersService {
         newUser.setUsername(request.getUsername());
         newUser.setEmail(request.getEmail());
         newUser.setPassword(passwordEncoder.encode(request.getPassword()));
+        newUser.setRole("USER"); // Force USER role
         usersRepository.save(newUser);
     }
 
@@ -63,7 +64,7 @@ public class UsersService {
         return Pattern.compile(pattern).matcher(password).matches();
     }
 
-    //dang nhap
+    // dang nhap
     public Users findByUsernameOrEmail(String usernameOrEmail) {
         Users user = usersRepository.findByUsername(usernameOrEmail);
         if (user == null) {
@@ -72,6 +73,35 @@ public class UsersService {
         return user;
     }
 
+    @Override
+    public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String username)
+            throws org.springframework.security.core.userdetails.UsernameNotFoundException {
+        Users user = usersRepository.findByUsername(username);
+        if (user == null) {
+            throw new org.springframework.security.core.userdetails.UsernameNotFoundException("User not found");
+        }
+
+        // Convert role to Authority
+        String role = user.getRole();
+        if (role == null || role.isEmpty()) {
+            role = "USER";
+        }
+        // Ensure role starts with ROLE_ if using hasRole, or just use as is if using
+        // hasAuthority
+        // Standard practice: ROLE_ADMIN, ROLE_USER. But let's stick to simple strings
+        // if config uses hasAuthority or manual check.
+        // For hasRole("ADMIN"), Spring expects "ROLE_ADMIN".
+        // Let's assume we store "ADMIN" and "USER" in DB.
+
+        java.util.List<org.springframework.security.core.GrantedAuthority> authorities = java.util.Collections
+                .singletonList(
+                        new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role));
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                authorities);
+    }
 
     // CRUD
     public Users createUsers(UsersCreationRequest request) {
@@ -79,6 +109,7 @@ public class UsersService {
         user.setUsername(request.getUsername());
         user.setPassword(request.getPassword());
         user.setEmail(request.getEmail());
+        user.setRole("USER");
         return usersRepository.save(user);
     }
 

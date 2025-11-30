@@ -1,28 +1,5 @@
-// Khởi tạo danh sách người dùng mặc định
-let defaultUsers = [
-    { username: 'admin', email: 'admin@gmail.com', password: '123', role: 'admin' },
-    { username: 'user', email: 'user@gmail.com', password: '123', role: 'user' }
-// Khởi tạo danh sách người dùng mặc định
-let defaultUsers = [
-        { username: 'admin', email: 'admin@gmail.com', password: '123', role: 'admin' },
-        { username: 'user', email: 'user@gmail.com', password: '123', role: 'user' }
-    ];
-
-// Lấy danh sách user trong localStorage hoặc dùng mặc định
 // API URL
 const API_URL = 'http://localhost:8080/foundation';
-
-// ========================================
-// HELPER: GET AUTH HEADERS
-// ========================================
-function getAuthHeaders() {
-    const token = localStorage.getItem('accessToken');
-    const headers = { 'Content-Type': 'application/json' };
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-}
 
 // ========================================
 // ĐĂNG NHẬP - GỌI API BACKEND
@@ -50,33 +27,52 @@ if (loginForm) {
                 })
             });
 
+            const loginResult = await loginResponse.text();
+
             if (!loginResponse.ok) {
-                const errorText = await loginResponse.text();
                 errorMsg.style.color = 'red';
-                errorMsg.innerText = errorText || 'Đăng nhập thất bại!';
+                errorMsg.innerText = loginResult;
                 return;
             }
 
-            const data = await loginResponse.json();
+            // Bước 2: Lấy danh sách users để tìm user_id
+            const usersResponse = await fetch(`${API_URL}/users`);
+            if (!usersResponse.ok) {
+                throw new Error('Không thể lấy thông tin user');
+            }
 
-            // Bước 2: Lưu token và thông tin user
-            localStorage.setItem('accessToken', data.accessToken);
-            localStorage.setItem('currentUser', JSON.stringify({
-                user_id: data.user_id,
-                username: data.username,
-                email: data.email,
-                role: data.role
-            }));
+            const users = await usersResponse.json();
+
+            // Bước 3: Tìm user vừa đăng nhập
+            const currentUser = users.find(u =>
+                (u.username === usernameOrEmail || u.email === usernameOrEmail)
+            );
+
+            if (!currentUser) {
+                errorMsg.style.color = 'red';
+                errorMsg.innerText = 'Không tìm thấy thông tin user!';
+                return;
+            }
+
+            // Bước 4: Lưu vào localStorage với đầy đủ thông tin
+            const userInfo = {
+                user_id: currentUser.user_id,
+                username: currentUser.username,
+                email: currentUser.email,
+                role: currentUser.role || 'user'
+            };
+
+            localStorage.setItem('currentUser', JSON.stringify(userInfo));
 
             console.log('✅ Đăng nhập thành công!');
-            console.log('Token:', data.accessToken);
+            console.log('User info:', userInfo);
 
-            // Bước 3: Chuyển hướng
+            // Bước 5: Chuyển hướng
             errorMsg.style.color = 'green';
             errorMsg.innerText = 'Đăng nhập thành công! Đang chuyển hướng...';
 
             setTimeout(() => {
-                window.location.href = data.role === 'admin' ? 'admin.html' : 'index.html';
+                window.location.href = currentUser.role === 'admin' ? 'admin.html' : 'index.html';
             }, 1000);
 
         } catch (error) {
@@ -159,7 +155,6 @@ const logoutBtn = document.getElementById('logoutBtn');
 if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
         localStorage.removeItem('currentUser');
-        localStorage.removeItem('accessToken');
         console.log('✅ Đã đăng xuất');
         window.location.href = 'login.html';
     });
@@ -170,17 +165,16 @@ if (logoutBtn) {
 // ========================================
 if (window.location.pathname.includes('index.html')) {
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-    const token = localStorage.getItem('accessToken');
 
     console.log('=== CHECK LOGIN STATUS ===');
+    console.log('Current user:', currentUser);
 
-    if (!currentUser || !token) {
+    if (!currentUser || !currentUser.user_id) {
         console.log('❌ Chưa đăng nhập, redirect về login');
         alert('Vui lòng đăng nhập trước!');
         window.location.href = 'login.html';
     } else {
-        console.log('✅ Đã đăng nhập, user:', currentUser.username);
-        // Có thể thêm logic verify token với backend ở đây nếu cần
+        console.log('✅ Đã đăng nhập, user_id:', currentUser.user_id);
     }
 }
 
@@ -189,3 +183,4 @@ if (window.location.pathname.includes('index.html')) {
 // ========================================
 console.log('=== AUTH.JS LOADED ===');
 console.log('API URL:', API_URL);
+console.log('localStorage currentUser:', localStorage.getItem('currentUser'));

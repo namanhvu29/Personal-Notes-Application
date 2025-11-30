@@ -1,11 +1,8 @@
 package FoundationProject.FoundationProject.controller;
 
-import FoundationProject.FoundationProject.dto.request.ForgotPasswordRequest;
-import FoundationProject.FoundationProject.dto.request.ResetPasswordRequest;
 import FoundationProject.FoundationProject.dto.request.UsersCreationRequest;
 import FoundationProject.FoundationProject.dto.request.UsersRegisterRequest;
 import FoundationProject.FoundationProject.dto.request.UsersLoginRequest;
-import FoundationProject.FoundationProject.dto.request.VerifyResetCodeRequest;
 import FoundationProject.FoundationProject.entity.Users;
 import FoundationProject.FoundationProject.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,9 +36,6 @@ public class UsersController {
         }
     }
 
-    @Autowired
-    private FoundationProject.FoundationProject.security.JwtTokenProvider tokenProvider;
-
     // ĐĂNG NHẬP NGƯỜI DÙNG
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UsersLoginRequest request) {
@@ -55,70 +49,7 @@ public class UsersController {
                 return ResponseEntity.badRequest().body("Sai mật khẩu!");
             }
 
-            // Generate Token
-            String token = tokenProvider.generateToken(user.getUsername(), user.getRole());
-
-            // Return token and user info
-            java.util.Map<String, Object> response = new java.util.HashMap<>();
-            response.put("accessToken", token);
-            response.put("tokenType", "Bearer");
-            response.put("user_id", user.getUser_id());
-            response.put("username", user.getUsername());
-            response.put("email", user.getEmail());
-            response.put("role", user.getRole());
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Lỗi hệ thống: " + e.getMessage());
-        }
-    }
-
-    // ========================================
-    // QUÊN MẬT KHẨU - GỬI MÃ RESET
-    // ========================================
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
-        try {
-            usersService.sendResetCode(request.getEmail());
-            return ResponseEntity.ok("Mã xác thực đã được gửi đến email của bạn!");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Lỗi khi gửi email: " + e.getMessage());
-        }
-    }
-
-    // ========================================
-    // XÁC THỰC MÃ RESET
-    // ========================================
-    @PostMapping("/verify-reset-code")
-    public ResponseEntity<?> verifyResetCode(@RequestBody VerifyResetCodeRequest request) {
-        try {
-            boolean isValid = usersService.verifyResetCode(request.getEmail(), request.getCode());
-            if (isValid) {
-                return ResponseEntity.ok("Mã xác thực hợp lệ!");
-            } else {
-                return ResponseEntity.badRequest().body("Mã xác thực không đúng hoặc đã hết hạn!");
-            }
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Lỗi hệ thống: " + e.getMessage());
-        }
-    }
-
-    // ========================================
-    // ĐẶT LẠI MẬT KHẨU
-    // ========================================
-    @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
-        try {
-            usersService.resetPassword(
-                    request.getEmail(),
-                    request.getCode(),
-                    request.getNewPassword(),
-                    request.getConfirmPassword());
-            return ResponseEntity.ok("Đặt lại mật khẩu thành công!");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.ok("Đăng nhập thành công!");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Lỗi hệ thống: " + e.getMessage());
         }
