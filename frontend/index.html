@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <title>Notes App - Database Integrated</title>
     <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/ai-assist.css" />
 </head>
+
 <body>
     <div class="container">
 
@@ -13,7 +16,7 @@
                 <span class="search-icon">🔍</span>
                 <input type="text" id="searchBox" placeholder="Tìm kiếm ghi chú..." class="search-box" />
             </div>
-        
+
             <div id="searchResultsContainer" class="search-results-container">
                 <ul id="searchResultsList" class="search-results-list"></ul>
             </div>
@@ -68,51 +71,52 @@
                     <button id="profileBtn">👤 Hồ sơ</button>
                     <button id="openTrashBtn">🗑️ Thùng rác</button>
                     <button id="logoutBtn">🚪 Đăng xuất</button>
-                    
+
                 </div>
             </div>
         </aside>
 
         <main class="note-view" id="noteView">
-          <div class="note-header">
-              <span id="saveStatus" class="save-status">Đang tải...</span>
-      
-              <div class="note-actions">
-                  <div class="star-container">
-                      <button class="star-btn" id="starBtn">☆
-                          <span class="tooltip">Đánh dấu quan trọng</span>
-                      </button>
-                  </div>
-                  <div class="dropdown">
-                      <button class="menu-btn">⋮</button>
-                      <div class="dropdown-content">
-                          <button id="deleteBtn">🗑️ Xóa ghi chú</button>
-                          <div class="add-to-category-wrapper">
-                              <button id="addToCategoryBtn">🏷️ Thêm vào danh mục</button>
-                              <ul id="categoryDropdown" class="category-dropdown"></ul>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-      
-          <div class="note-content-wrapper">
-              <input id="noteTitle" class="note-title" placeholder="Tiêu đề ghi chú...">
-              <div id="slashMenu" class="slash-menu-container">
-                <div class="menu-title">BASIC BLOCKS</div>
-                <ul id="slashList">
-                    <li data-type="text">📝 Text</li>
-                    <li data-type="h1"># Heading 1</li>
-                    <li data-type="h2">## Heading 2</li>
-                    <li data-type="bullet">• Bullet List</li>
-                    <li data-type="number">1. Number List</li>
-                    <li data-type="todo">✓ To Do List</li>
-                    <li data-type="separator">--- Separator</li>
-                    </ul>
+            <div class="note-header">
+                <span id="saveStatus" class="save-status">Đang tải...</span>
+
+                <div class="note-actions">
+                    <div class="star-container">
+                        <button class="star-btn" id="starBtn">☆
+                            <span class="tooltip">Đánh dấu quan trọng</span>
+                        </button>
+                    </div>
+                    <div class="dropdown">
+                        <button class="menu-btn">⋮</button>
+                        <div class="dropdown-content">
+                            <button id="deleteBtn">🗑️ Xóa ghi chú</button>
+                            <div class="add-to-category-wrapper">
+                                <button id="addToCategoryBtn">🏷️ Thêm vào danh mục</button>
+                                <ul id="categoryDropdown" class="category-dropdown"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-              <textarea id="noteContent" class="note-content" placeholder="Bắt đầu viết ghi chú của bạn..."></textarea>
-          </div>
-      </main>
+
+            <div class="note-content-wrapper">
+                <input id="noteTitle" class="note-title" placeholder="Tiêu đề ghi chú...">
+                <div id="slashMenu" class="slash-menu-container">
+                    <div class="menu-title">BASIC BLOCKS</div>
+                    <ul id="slashList">
+                        <li data-type="text">📝 Text</li>
+                        <li data-type="h1"># Heading 1</li>
+                        <li data-type="h2">## Heading 2</li>
+                        <li data-type="bullet">• Bullet List</li>
+                        <li data-type="number">1. Number List</li>
+                        <li data-type="todo">✓ To Do List</li>
+                        <li data-type="separator">--- Separator</li>
+                    </ul>
+                </div>
+                <textarea id="noteContent" class="note-content"
+                    placeholder="Bắt đầu viết ghi chú của bạn..."></textarea>
+            </div>
+        </main>
 
     </div>
     <div id="trashModal" class="modal-overlay">
@@ -121,16 +125,18 @@
                 <h3>🗑️ Thùng rác</h3>
                 <button id="closeModalBtn" class="close-btn">&times;</button>
             </div>
-    
+
             <ul id="trashList" class="modal-trash-list">
-                </ul>
-                <button id="emptyTrashAllBtn" class="empty-trash-btn">🗑️ Xóa Vĩnh Viễn Tất Cả</button>
+            </ul>
+            <button id="emptyTrashAllBtn" class="empty-trash-btn">🗑️ Xóa Vĩnh Viễn Tất Cả</button>
         </div>
     </div>
 
     <script src="js/auth.js"></script>
     <script src="js/notes-api.js"></script>
+    <script src="js/ai-assist.js"></script>
     <script src="js/app.js"></script>
 </body>
+
 </html>
 <!-- new -->
