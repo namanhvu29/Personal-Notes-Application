@@ -42,10 +42,9 @@ async function fetchDashboardStats() {
         const data = await response.json();
         document.getElementById('total-users').textContent = data.totalUsers;
         document.getElementById('total-notes').textContent = data.totalNotes;
-        document.getElementById('system-uptime').textContent = data.lastUpdated; 
-        const label = document.querySelector('.stat-card.gray .stat-label');
-        if(label) label.textContent = "Last Updated";
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error("Lỗi lấy thống kê:", e); 
+    }
 }
 
 async function fetchNotesList() {
@@ -281,3 +280,4 @@ window.addEventListener('DOMContentLoaded', () => {
     fetchAdminLogs();
     loadAllSettings();
 });
+
