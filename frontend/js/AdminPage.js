@@ -1,310 +1,283 @@
 
-<script>
-        // State variables
-        let totalUsers = 0;
-        let totalNotes = 0;
-        let systemUptime = 0;
-        let adminLogs = [];
-        let notes = [];
+const API_BASE = 'http://localhost:8080/foundation/api/admin';
+const USER_API_BASE = 'http://localhost:8080/foundation/users';
 
-        // Navigation
-        const navLinks = document.querySelectorAll('.nav-link');
-        const pages = {
-            'dashboard': document.getElementById('dashboard-page'),
-            'notes': document.getElementById('notes-page'),
-            'settings': document.getElementById('settings-page')
-        };
+const navLinks = document.querySelectorAll('.nav-link');
+const pages = {
+    'dashboard': document.getElementById('dashboard-page'),
+    'notes': document.getElementById('notes-page'),
+    'settings': document.getElementById('settings-page')
+};
 
-        navLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                const pageName = this.getAttribute('data-page');
-                
-                // Update active nav link
-                navLinks.forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
-                
-                // Show/hide pages
-                Object.keys(pages).forEach(key => {
-                    if (key === pageName) {
-                        pages[key].classList.remove('hidden');
-                    } else {
-                        pages[key].classList.add('hidden');
-                    }
-                });
-            });
+navLinks.forEach(link => {
+    link.addEventListener('click', function() {
+        const pageName = this.getAttribute('data-page');
+        navLinks.forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+        Object.keys(pages).forEach(key => {
+            pages[key].classList.toggle('hidden', key !== pageName);
         });
+    });
+});
 
-        // Function to update user count (will be called when new user registers)
-        function updateUserCount() {
-            totalUsers++;
-            document.getElementById('total-users').textContent = totalUsers.toLocaleString();
-        }
+// Hàm xử lý Toggle Switch (Công tắc)
+function toggleSetting(element) {
+    element.classList.toggle('active');
+}
 
-        // Function to update note count (will be called when new note is created)
-        function updateNoteCount() {
-            totalNotes++;
-            document.getElementById('total-notes').textContent = totalNotes.toLocaleString();
-        }
+// Helper: Lấy giá trị của Toggle (True/False)
+function getToggleState(element) {
+    return element.classList.contains('active') ? "true" : "false";
+}
 
-        // Function to update system uptime (will be called by backend)
-        function updateSystemUptime(uptimePercentage) {
-            systemUptime = uptimePercentage;
-            document.getElementById('system-uptime').textContent = systemUptime + '%';
-        }
+// Helper: Set trạng thái cho Toggle dựa trên dữ liệu server
+function setToggleState(element, value) {
+    if (value === "true") element.classList.add('active');
+    else element.classList.remove('active');
+}
+async function fetchDashboardStats() {
+    try {
+        const response = await fetch(`${API_BASE}/stats`);
+        if (!response.ok) return;
+        const data = await response.json();
+        document.getElementById('total-users').textContent = data.totalUsers;
+        document.getElementById('total-notes').textContent = data.totalNotes;
+        document.getElementById('system-uptime').textContent = data.lastUpdated; 
+        const label = document.querySelector('.stat-card.gray .stat-label');
+        if(label) label.textContent = "Last Updated";
+    } catch (e) { console.error(e); }
+}
 
-        // Function to add new admin log entry
-        function addAdminLog(logMessage) {
-            const logContainer = document.getElementById('admin-log-list');
-            
-            // Remove empty message if exists
-            const emptyMessage = logContainer.querySelector('.empty-log');
-            if (emptyMessage) {
-                emptyMessage.remove();
-            }
+async function fetchNotesList() {
+    try {
+        const response = await fetch(`${API_BASE}/notes`);
+        if (!response.ok) return;
+        const data = await response.json();
+        const notesContainer = document.getElementById('notes-list');
+        notesContainer.innerHTML = '';
 
-            // Create new log item
-            const logItem = document.createElement('div');
-            logItem.className = 'log-item';
-            logItem.innerHTML = `
-                <div class="avatar">U</div>
-                <div class="log-text">${logMessage}</div>
-            `;
-            
-            // Add to beginning of list (newest first)
-            logContainer.insertBefore(logItem, logContainer.firstChild);
-            
-            // Store in array
-            adminLogs.unshift(logMessage);
-            
-            // Optional: Limit to last 50 logs
-            if (adminLogs.length > 50) {
-                adminLogs.pop();
-                const lastLog = logContainer.lastElementChild;
-                if (lastLog) lastLog.remove();
-            }
-        }
-
-        // Function to load admin logs from backend
-        function loadAdminLogs(logs) {
-            const logContainer = document.getElementById('admin-log-list');
-            logContainer.innerHTML = '';
-            
-            if (logs && logs.length > 0) {
-                logs.forEach(log => {
-                    const logItem = document.createElement('div');
-                    logItem.className = 'log-item';
-                    logItem.innerHTML = `
-                        <div class="avatar">U</div>
-                        <div class="log-text">${log}</div>
-                    `;
-                    logContainer.appendChild(logItem);
-                });
-                adminLogs = [...logs];
-            } else {
-                logContainer.innerHTML = '<div class="empty-log">No admin activities recorded</div>';
-            }
-        }
-
-        // Function to add new note
-        function addNewNote(noteData) {
-            const notesContainer = document.getElementById('notes-list');
-            
-            // Remove empty message if exists
-            const emptyMessage = notesContainer.querySelector('.empty-notes');
-            if (emptyMessage) {
-                emptyMessage.remove();
-            }
-
-            // Create new note item
-            const noteItem = document.createElement('div');
-            noteItem.className = 'note-item';
-            noteItem.setAttribute('data-id', noteData.id);
-            noteItem.innerHTML = `
-                <div class="note-content">
-                    <div class="avatar">U</div>
-                    <div class="note-info">
-                        <div class="note-title">${noteData.title}</div>
-                        <div class="note-meta">${noteData.author} | ${noteData.date}</div>
-                    </div>
-                </div>
-                <div class="note-actions">
-                    <button class="icon-btn">🔍</button>
-                    <button class="icon-btn delete" onclick="deleteNote('${noteData.id}')">🗑️</button>
-                </div>
-            `;
-            
-            // Add to beginning of list (newest first)
-            notesContainer.insertBefore(noteItem, notesContainer.firstChild);
-            
-            // Store in array
-            notes.unshift(noteData);
-        }
-
-        // Function to load notes from backend
-        function loadNotes(notesList) {
-            const notesContainer = document.getElementById('notes-list');
-            notesContainer.innerHTML = '';
-            
-            if (notesList && notesList.length > 0) {
-                notesList.forEach(note => {
-                    const noteItem = document.createElement('div');
-                    noteItem.className = 'note-item';
-                    noteItem.setAttribute('data-id', note.id);
-                    noteItem.innerHTML = `
+        if (data.length > 0) {
+            data.forEach(note => {
+                const dateStr = new Date(note.createdAt).toLocaleDateString('vi-VN');
+                const authorName = note.createdBy || "Unknown";
+                const html = `
+                    <div class="note-item" data-id="${note.noteId}">
                         <div class="note-content">
-                            <div class="avatar">U</div>
+                            <div class="avatar">${authorName.charAt(0).toUpperCase()}</div>
                             <div class="note-info">
                                 <div class="note-title">${note.title}</div>
-                                <div class="note-meta">${note.author} | ${note.date}</div>
+                                <div class="note-meta">${authorName} | ${dateStr}</div>
                             </div>
                         </div>
                         <div class="note-actions">
-                            <button class="icon-btn">🔍</button>
-                            <button class="icon-btn delete" onclick="deleteNote('${note.id}')">🗑️</button>
+                            <button class="icon-btn delete" onclick="deleteNote(${note.noteId})">🗑️</button>
                         </div>
-                    `;
-                    notesContainer.appendChild(noteItem);
-                });
-                notes = [...notesList];
-            } else {
-                notesContainer.innerHTML = '<div class="empty-notes">No notes available</div>';
-            }
+                    </div>`;
+                notesContainer.innerHTML += html;
+            });
+        } else {
+            notesContainer.innerHTML = '<div class="empty-notes">No notes found</div>';
+        }
+    } catch (e) { console.error(e); }
+}
+
+async function fetchAdminLogs() {
+    try {
+        const response = await fetch(`${API_BASE}/logs`);
+        if (!response.ok) return;
+        const data = await response.json();
+        const logContainer = document.getElementById('admin-log-list');
+        logContainer.innerHTML = '';
+        data.forEach(log => {
+            const time = new Date(log.timestamp).toLocaleTimeString();
+            logContainer.innerHTML += `
+                <div class="log-item">
+                    <div class="avatar">A</div>
+                    <div class="log-text">${log.action} - ${time}</div>
+                </div>`;
+        });
+    } catch (e) { console.error(e); }
+}
+
+async function deleteNote(id) {
+    if(!confirm("Xóa ghi chú này?")) return;
+    try {
+        await fetch(`${API_BASE}/notes/${id}`, { method: 'DELETE' });
+        document.querySelector(`.note-item[data-id="${id}"]`).remove();
+        fetchDashboardStats();
+        fetchAdminLogs();
+    } catch (e) { alert("Lỗi xóa note"); }
+}
+
+// 1. Tải toàn bộ cài đặt khi mở trang
+async function loadAllSettings() {
+    try {
+        const response = await fetch(`${API_BASE}/settings`);
+        if (!response.ok) return;
+        const s = await response.json(); // s = settings object
+
+        // Helper điền dữ liệu
+        const setVal = (id, key) => {
+            const el = document.getElementById(id);
+            if (el && s[key] !== undefined) el.value = s[key];
+        };
+        const setTog = (containerSelector, key) => {
+        };
+
+        // --- System ---
+        setVal('site-name', 'site_name');
+        setVal('default-language', 'language');
+        setVal('timezone', 'timezone');
+        // Toggle Maintenance
+        const maintToggle = document.querySelector('#settings-page .settings-section:nth-child(2) .toggle-switch');
+        if(maintToggle && s['maintenance_mode']) setToggleState(maintToggle, s['maintenance_mode']);
+
+        // --- User Management ---
+        setVal('max-notes', 'max_notes');
+        setVal('storage-limit', 'storage_limit');
+        // Toggles (Public Reg & Email Verify)
+        const userSection = document.querySelector('#settings-page .settings-section:nth-child(3)');
+        if(userSection) {
+            const toggles = userSection.querySelectorAll('.toggle-switch');
+            if(toggles[0] && s['public_registration']) setToggleState(toggles[0], s['public_registration']);
+            if(toggles[1] && s['email_verification']) setToggleState(toggles[1], s['email_verification']);
         }
 
-        // Delete note function
-        function deleteNote(id) {
-            const noteElement = document.querySelector(`.note-item[data-id="${id}"]`);
-            if (noteElement) {
-                noteElement.style.transition = 'opacity 0.3s';
-                noteElement.style.opacity = '0';
-                setTimeout(() => {
-                    noteElement.remove();
-                    
-                    // Remove from array
-                    notes = notes.filter(note => note.id != id);
-                    
-                    // Show empty state if no notes left
-                    const notesContainer = document.getElementById('notes-list');
-                    if (notes.length === 0) {
-                        notesContainer.innerHTML = '<div class="empty-notes">No notes available</div>';
-                    }
-                }, 300);
-            }
-        }
+        // --- Security ---
+        setVal('min-password', 'min_password');
+        setVal('session-timeout', 'session_timeout');
+        setVal('max-login', 'max_login_attempts');
+        setVal('log-retention', 'log_retention');
 
-        // Logout function
-        function handleLogout() {
-            // Redirect to login page
-            window.location.href = '/login';
-        }
+        // --- Email ---
+        setVal('smtp-server', 'smtp_server');
+        setVal('smtp-port', 'smtp_port');
+        const emailToggle = document.querySelector('#settings-page .settings-section:nth-child(5) .toggle-switch');
+        if(emailToggle && s['email_notifications']) setToggleState(emailToggle, s['email_notifications']);
 
-        // Load statistics from backend on page load
-        function loadStatistics() {
-     
-            // Show empty state initially
-            loadAdminLogs([]);
-            loadNotes([]);
-        }
+        // --- Backup & API ---
+        setVal('backup-frequency', 'backup_frequency');
+        setVal('data-retention', 'data_retention');
+        setVal('rate-limit', 'rate_limit');
+        
+        // --- Appearance ---
+        setVal('theme', 'theme');
+        setVal('date-format', 'date_format');
 
-        // Load statistics when page loads
-        window.addEventListener('DOMContentLoaded', loadStatistics);
+    } catch (e) { console.error("Lỗi load settings:", e); }
+}
 
-        // Settings functions
-        function toggleSetting(element) {
-            element.classList.toggle('active');
-        }
+// Hàm chung để lưu settings
+async function saveConfig(payload, msg) {
+    try {
+        const res = await fetch(`${API_BASE}/settings`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        if(res.ok) alert(msg || "Lưu thành công!");
+        else alert("Lỗi khi lưu!");
+    } catch(e) { alert("Lỗi kết nối server"); }
+}
 
-        function saveAccountSettings() {
-            const name = document.getElementById('admin-name').value;
-            const email = document.getElementById('admin-email').value;
-            const password = document.getElementById('admin-password').value;
-            
-            // In real application, send to backend
-            alert('Account settings saved successfully!');
-            console.log('Saving account settings:', { name, email, password });
-        }
+// 2. Các hàm Save chi tiết (Gắn vào nút onclick trong HTML)
 
-        function saveSystemSettings() {
-            const siteName = document.getElementById('site-name').value;
-            const language = document.getElementById('default-language').value;
-            const timezone = document.getElementById('timezone').value;
-            
-            alert('System settings saved successfully!');
-            console.log('Saving system settings:', { siteName, language, timezone });
-        }
+function saveSystemSettings() {
+    const section = document.querySelector('#settings-page .settings-section:nth-child(2)');
+    const payload = {
+        "site_name": document.getElementById('site-name').value,
+        "language": document.getElementById('default-language').value,
+        "timezone": document.getElementById('timezone').value,
+        "maintenance_mode": getToggleState(section.querySelector('.toggle-switch'))
+    };
+    saveConfig(payload, "Đã lưu cấu hình hệ thống!");
+}
 
-        function saveUserSettings() {
-            const maxNotes = document.getElementById('max-notes').value;
-            const storageLimit = document.getElementById('storage-limit').value;
-            
-            alert('User management settings saved successfully!');
-            console.log('Saving user settings:', { maxNotes, storageLimit });
-        }
+function saveUserSettings() {
+    const section = document.querySelector('#settings-page .settings-section:nth-child(3)');
+    const toggles = section.querySelectorAll('.toggle-switch');
+    const payload = {
+        "public_registration": getToggleState(toggles[0]),
+        "email_verification": getToggleState(toggles[1]),
+        "max_notes": document.getElementById('max-notes').value,
+        "storage_limit": document.getElementById('storage-limit').value
+    };
+    saveConfig(payload, "Đã lưu cấu hình người dùng!");
+}
 
-        function saveSecuritySettings() {
-            const minPassword = document.getElementById('min-password').value;
-            const sessionTimeout = document.getElementById('session-timeout').value;
-            const maxLogin = document.getElementById('max-login').value;
-            const logRetention = document.getElementById('log-retention').value;
-            
-            alert('Security settings saved successfully!');
-            console.log('Saving security settings:', { minPassword, sessionTimeout, maxLogin, logRetention });
-        }
+function saveSecuritySettings() {
+    const payload = {
+        "min_password": document.getElementById('min-password').value,
+        "session_timeout": document.getElementById('session-timeout').value,
+        "max_login_attempts": document.getElementById('max-login').value,
+        "log_retention": document.getElementById('log-retention').value
+    };
+    saveConfig(payload, "Đã lưu cấu hình bảo mật!");
+}
 
-        function saveEmailSettings() {
-            const smtpServer = document.getElementById('smtp-server').value;
-            const smtpPort = document.getElementById('smtp-port').value;
-            
-            alert('Email settings saved successfully!');
-            console.log('Saving email settings:', { smtpServer, smtpPort });
-        }
+function saveEmailSettings() {
+    const section = document.querySelector('#settings-page .settings-section:nth-child(5)');
+    const payload = {
+        "smtp_server": document.getElementById('smtp-server').value,
+        "smtp_port": document.getElementById('smtp-port').value,
+        "email_notifications": getToggleState(section.querySelector('.toggle-switch'))
+    };
+    saveConfig(payload, "Đã lưu cấu hình Email!");
+}
 
-        function testEmail() {
-            alert('Test email sent! Check your inbox.');
-        }
+function saveBackupSettings() {
+    const section = document.querySelector('#settings-page .settings-section:nth-child(6)');
+    const payload = {
+        "auto_backup": getToggleState(section.querySelector('.toggle-switch')),
+        "backup_frequency": document.getElementById('backup-frequency').value,
+        "data_retention": document.getElementById('data-retention').value
+    };
+    saveConfig(payload, "Đã lưu cấu hình Backup!");
+}
 
-        function saveBackupSettings() {
-            const frequency = document.getElementById('backup-frequency').value;
-            const retention = document.getElementById('data-retention').value;
-            
-            alert('Backup settings saved successfully!');
-            console.log('Saving backup settings:', { frequency, retention });
-        }
+function saveApiSettings() {
+    const section = document.querySelector('#settings-page .settings-section:nth-child(7)');
+    const payload = {
+        "api_enabled": getToggleState(section.querySelector('.toggle-switch')),
+        "rate_limit": document.getElementById('rate-limit').value
+    };
+    saveConfig(payload, "Đã lưu cấu hình API!");
+}
 
-        function createBackup() {
-            alert('Creating backup... This may take a few moments.');
-            setTimeout(() => {
-                alert('Backup created successfully!');
-            }, 2000);
-        }
+function saveAppearanceSettings() {
+    const payload = {
+        "theme": document.getElementById('theme').value,
+        "date_format": document.getElementById('date-format').value
+    };
+    saveConfig(payload, "Đã lưu cấu hình giao diện!");
+}
 
-        function exportData() {
-            alert('Exporting data... Download will start shortly.');
-            setTimeout(() => {
-                alert('Data exported successfully!');
-            }, 2000);
-        }
+// Account Settings (Logic cũ - Cần ID thật)
+async function saveAccountSettings() {
+    // Demo update user ID 1
+    const email = document.getElementById('admin-email').value;
+    const pass = document.getElementById('admin-password').value;
+    try {
+        await fetch(`${USER_API_BASE}/1`, {
+            method: 'PUT',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({email: email, password: pass})
+        });
+        alert("Cập nhật tài khoản Admin thành công!");
+    } catch(e) { alert("Lỗi cập nhật user"); }
+}
 
-        function saveApiSettings() {
-            const rateLimit = document.getElementById('rate-limit').value;
-            
-            alert('API settings saved successfully!');
-            console.log('Saving API settings:', { rateLimit });
-        }
+// Các nút giả lập (chưa có logic backend thực tế)
+function testEmail() { alert("Đã gửi email test giả lập!"); }
+function createBackup() { alert("Đang tạo bản sao lưu..."); }
+function exportData() { alert("Đang xuất dữ liệu..."); }
+function regenerateApiKey() { alert("API Key mới: " + Math.random().toString(36).substring(7)); }
+function handleLogout() { window.location.href = '/login'; }
 
-        function regenerateApiKey() {
-            if (confirm('Are you sure you want to regenerate the API key? This will invalidate the current key.')) {
-                alert('New API key generated: ' + Math.random().toString(36).substring(2, 15));
-            }
-        }
 
-        function saveAppearanceSettings() {
-            const theme = document.getElementById('theme').value;
-            const dateFormat = document.getElementById('date-format').value;
-            
-            alert('Appearance settings saved successfully!');
-            console.log('Saving appearance settings:', { theme, dateFormat });
-        }
-
-    </script>
-
+window.addEventListener('DOMContentLoaded', () => {
+    fetchDashboardStats();
+    fetchNotesList();
+    fetchAdminLogs();
+    loadAllSettings();
+});
