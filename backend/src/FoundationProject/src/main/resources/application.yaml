@@ -42,6 +42,12 @@ spring:
             enable: true
             required: false
 
+# Gemini AI Configuration
+gemini:
+  api:
+    key: AIzaSyBuRDi7qjcR8FwbWscejFR4YxsF9v0y8Js
+    base-url: https://generativelanguage.googleapis.com/v1beta
+
 ---
 
 # Cấu hình PROD
