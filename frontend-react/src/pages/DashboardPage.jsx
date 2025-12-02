@@ -34,9 +34,9 @@ const DashboardPage = () => {
     useEffect(() => {
         // Mock data
         const mockNotes = [
-            { id: 1, title: 'Ghi chú mẫu 1', content: 'Nội dung ghi chú mẫu 1', isImportant: false, categoryId: null },
-            { id: 2, title: 'Ghi chú quan trọng', content: 'Nội dung quan trọng', isImportant: true, categoryId: 1 },
-            { id: 3, title: 'Việc cần làm', content: '<div><input type="checkbox"> Mua sữa</div>', isImportant: false, categoryId: 2 },
+            { id: 1, title: 'Ghi chú mẫu 1', content: 'Nội dung ghi chú mẫu 1', isImportant: false, categoryId: null, type: 'note' },
+            { id: 2, title: 'Ghi chú quan trọng', content: 'Nội dung quan trọng', isImportant: true, categoryId: 1, type: 'note' },
+            { id: 3, title: 'Việc cần làm', content: '<div><input type="checkbox"> Mua sữa</div>', isImportant: false, categoryId: 2, type: 'todo' },
         ];
         setNotes(mockNotes);
     }, []);
@@ -59,10 +59,24 @@ const DashboardPage = () => {
             id: Date.now(),
             title: '',
             content: '',
-            isImportant: false
+            isImportant: false,
+            type: 'note'
         };
         setNotes([newNote, ...notes]);
         setSelectedNote(newNote);
+        setSearchQuery('');
+    };
+
+    const handleAddTodo = () => {
+        const newTodo = {
+            id: Date.now(),
+            title: '',
+            content: '<div><input type="checkbox"> </div>',
+            isImportant: false,
+            type: 'todo'
+        };
+        setNotes([newTodo, ...notes]);
+        setSelectedNote(newTodo);
         setSearchQuery('');
     };
 
@@ -170,6 +184,15 @@ const DashboardPage = () => {
         setSearchQuery('');
     };
 
+    const handleMoveNoteToCategory = (noteId, categoryId) => {
+        const category = categories.find(c => c.id === categoryId);
+        if (category) {
+            setNotes(notes.map(n => n.id === noteId ? { ...n, categoryId: categoryId } : n));
+            // Optional: Show a toast or notification
+            console.log(`Moved note ${noteId} to category ${category.name}`);
+        }
+    };
+
     const handleLogout = () => {
         // TODO: Clear auth token
         navigate('/login');
@@ -181,10 +204,12 @@ const DashboardPage = () => {
                 notes={filteredNotes}
                 onSelectNote={handleSelectNote}
                 onAddNote={handleAddNote}
+                onAddTodo={handleAddTodo}
                 categories={categories}
                 onAddCategory={handleAddCategory}
                 onRenameCategory={handleRenameCategory}
                 onDeleteCategory={handleDeleteCategory}
+                onMoveNoteToCategory={handleMoveNoteToCategory}
                 onLogout={handleLogout}
                 onOpenTrash={() => setIsTrashOpen(true)}
                 searchQuery={searchQuery}

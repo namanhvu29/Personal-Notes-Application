@@ -5,19 +5,43 @@ const Sidebar = ({
     notes,
     onSelectNote,
     onAddNote,
+    onAddTodo,
     categories,
     onAddCategory,
     onRenameCategory,
     onDeleteCategory,
+    onMoveNoteToCategory,
     onLogout,
     onOpenTrash,
 
     searchQuery,
     onSearch,
     selectedCategory,
+    selectedCategory,
     onSelectCategory
 }) => {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [draggedNoteId, setDraggedNoteId] = useState(null);
+
+    const handleDragStart = (e, noteId) => {
+        setDraggedNoteId(noteId);
+        e.dataTransfer.setData('text/plain', noteId);
+        e.dataTransfer.effectAllowed = 'move';
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleDrop = (e, categoryId) => {
+        e.preventDefault();
+        const noteId = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        if (noteId && onMoveNoteToCategory) {
+            onMoveNoteToCategory(noteId, categoryId);
+            setDraggedNoteId(null);
+        }
+    };
 
     return (
         <aside className="sidebar">
@@ -58,7 +82,12 @@ const Sidebar = ({
                     <ul id="importantList">
                         {/* Filter important notes */}
                         {notes.filter(n => n.isImportant).map(note => (
-                            <li key={note.id} onClick={() => onSelectNote(note)}>
+                            <li
+                                key={note.id}
+                                onClick={() => onSelectNote(note)}
+                                draggable="true"
+                                onDragStart={(e) => handleDragStart(e, note.id)}
+                            >
                                 {note.title || 'Không có tiêu đề'}
                             </li>
                         ))}
@@ -71,8 +100,32 @@ const Sidebar = ({
                         <button id="addNoteBtn" title="Tạo ghi chú mới" onClick={(e) => { e.stopPropagation(); onAddNote(); }}>+</button>
                     </div>
                     <ul id="notesList">
-                        {notes.map(note => (
-                            <li key={note.id} onClick={() => onSelectNote(note)}>
+                        {notes.filter(n => !n.type || n.type === 'note').map(note => (
+                            <li
+                                key={note.id}
+                                onClick={() => onSelectNote(note)}
+                                draggable="true"
+                                onDragStart={(e) => handleDragStart(e, note.id)}
+                            >
+                                {note.title || 'Không có tiêu đề'}
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+
+                <section className="todo-section">
+                    <div className="notes-header" onClick={() => onSelectCategory(null)} style={{ cursor: 'pointer' }}>
+                        <h3>✅ To do list</h3>
+                        <button id="addTodoBtn" title="Tạo việc cần làm mới" onClick={(e) => { e.stopPropagation(); onAddTodo(); }}>+</button>
+                    </div>
+                    <ul id="todoList">
+                        {notes.filter(n => n.type === 'todo').map(note => (
+                            <li
+                                key={note.id}
+                                onClick={() => onSelectNote(note)}
+                                draggable="true"
+                                onDragStart={(e) => handleDragStart(e, note.id)}
+                            >
                                 {note.title || 'Không có tiêu đề'}
                             </li>
                         ))}
@@ -90,6 +143,8 @@ const Sidebar = ({
                                 key={cat.id}
                                 className={`category-item ${selectedCategory && selectedCategory.id === cat.id ? 'selected' : ''}`}
                                 onClick={() => onSelectCategory(cat)}
+                                onDragOver={handleDragOver}
+                                onDrop={(e) => handleDrop(e, cat.id)}
                                 style={{ backgroundColor: selectedCategory && selectedCategory.id === cat.id ? '#ffeb99' : 'transparent', cursor: 'pointer' }}
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
