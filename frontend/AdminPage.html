@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteFlow Admin Dashboard</title>
+    <link rel="stylesheet" href="css/AdminPage.css">
+</head>
+<body>
+    <!-- Browser Bar -->
+    <div class="browser-bar">
+        <div class="browser-dot dot-red"></div>
+        <div class="browser-dot dot-yellow"></div>
+        <div class="browser-dot dot-green"></div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <div class="logo-icon">☁</div>
+                <h1>NoteFlow Admin</h1>
+            </div>
+
+            <nav>
+                <button class="nav-link active" data-page="dashboard">Dashboard</button>
+                <button class="nav-link" data-page="notes">Notes</button>
+                <button class="nav-link" data-page="settings">Settings</button>
+            </nav>
+
+            <button class="logout-btn" onclick="handleLogout()">
+                <span>👤</span>
+                <span>Logout</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Dashboard Page -->
+        <div id="dashboard-page">
+            <h2 class="page-title">Dashboard Overview</h2>
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <div class="stat-label">Total Users</div>
+                    <div class="stat-value" id="total-users">0</div>
+                </div>
+
+                <div class="stat-card green">
+                    <div class="stat-label">Total Notes</div>
+                    <div class="stat-value" id="total-notes">0</div>
+                </div>
+
+                <div class="stat-card gray">
+                    <div class="stat-label"></div>
+                    <div class="stat-value" id="system-uptime"></div>
+                </div>
+            </div>
+
+            <h2 class="page-title">Dashboard Overview</h2>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Note Management -->
+                <div class="card">
+                    <h3 class="card-title">Note Management</h3>
+                    <div id="notes-list">
+                        <!-- Notes will be dynamically added here -->
+                    </div>
+                </div>
+
+                <!-- Admin History Log -->
+                <div class="card">
+                    <h3 class="card-title">Admin History Log</h3>
+                    <div id="admin-log-list">
+                        <!-- Admin logs will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Page -->
+        <div id="notes-page" class="hidden">
+            <h2 class="page-title">Notes Management</h2>
+            <div class="empty-page">
+                <p>Notes management page - Coming soon</p>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="settings-page" class="hidden">
+            <h2 class="page-title">Settings</h2>
+            <div class="settings-container">
+                
+                <!-- Account Settings -->
+                <div class="settings-section">
+                    <h3>Account Settings</h3>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Admin Name</div>
+                            <div class="setting-description">Update your display name</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="text" id="admin-name" placeholder="Admin Name" value="Administrator">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Email Address</div>
+                            <div class="setting-description">Your admin email address</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="email" id="admin-email" placeholder="admin@example.com" value="admin@noteflow.com">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Change Password</div>
+                            <div class="setting-description">Update your account password</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="password" id="admin-password" placeholder="New password">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Two-Factor Authentication</div>
+                            <div class="setting-description">Enable 2FA for extra security</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch" onclick="toggleSetting(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-buttons">
+                        <button class="btn-primary" onclick="saveAccountSettings()">Save Changes</button>
+                    </div>
+                </div>
+
+                <!-- System Configuration -->
+                <div class="settings-section">
+                    <h3>System Configuration</h3>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Site Name</div>
+                            <div class="setting-description">Your application name</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="text" id="site-name" placeholder="Site Name" value="NoteFlow">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Default Language</div>
+                            <div class="setting-description">System default language</div>
+                        </div>
+                        <div class="setting-control">
+                            <select id="default-language">
+                                <option value="en">English</option>
+                                <option value="vi">Vietnamese</option>
+                                <option value="es">Spanish</option>
+                                <option value="fr">French</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Timezone</div>
+                            <div class="setting-description">Default timezone for the system</div>
+                        </div>
+                        <div class="setting-control">
+                            <select id="timezone">
+                                <option value="UTC">UTC</option>
+                                <option value="Asia/Ho_Chi_Minh">Asia/Ho Chi Minh</option>
+                                <option value="America/New_York">America/New York</option>
+                                <option value="Europe/London">Europe/London</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Maintenance Mode</div>
+                            <div class="setting-description">Put site in maintenance mode</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch" onclick="toggleSetting(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-buttons">
+                        <button class="btn-primary" onclick="saveSystemSettings()">Save Changes</button>
+                    </div>
+                </div>
+
+                <!-- User Management Settings -->
+                <div class="settings-section">
+                    <h3>User Management Settings</h3>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Public Registration</div>
+                            <div class="setting-description">Allow new users to register</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Email Verification</div>
+                            <div class="setting-description">Require email verification for new accounts</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Max Notes Per User</div>
+                            <div class="setting-description">Maximum number of notes per user (0 = unlimited)</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" id="max-notes" value="100" min="0">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Storage Limit Per User (MB)</div>
+                            <div class="setting-description">Maximum storage per user in megabytes</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" id="storage-limit" value="500" min="0">
+                        </div>
+                    </div>
+                    <div class="setting-buttons">
+                        <button class="btn-primary" onclick="saveUserSettings()">Save Changes</button>
+                    </div>
+                </div>
+
+                <!-- Security Settings -->
+                <div class="settings-section">
+                    <h3>Security Settings</h3>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Minimum Password Length</div>
+                            <div class="setting-description">Minimum characters required for passwords</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" id="min-password" value="8" min="4">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Session Timeout (minutes)</div>
+                            <div class="setting-description">Auto logout after inactivity</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" id="session-timeout" value="30" min="5">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Max Login Attempts</div>
+                            <div class="setting-description">Lock account after failed attempts</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" id="max-login" value="5" min="3">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Security Logs Retention (days)</div>
+                            <div class="setting-description">Keep security logs for specified days</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" id="log-retention" value="90" min="7">
+                        </div>
+                    </div>
+                    <div class="setting-buttons">
+                        <button class="btn-primary" onclick="saveSecuritySettings()">Save Changes</button>
+                    </div>
+                </div>
+
+                <!-- Email Settings -->
+                <div class="settings-section">
+                    <h3>Email Settings</h3>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">SMTP Server</div>
+                            <div class="setting-description">SMTP server address</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="text" id="smtp-server" placeholder="smtp.gmail.com">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">SMTP Port</div>
+                            <div class="setting-description">SMTP server port</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" id="smtp-port" value="587">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Email Notifications</div>
+                            <div class="setting-description">Send email notifications to users</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-buttons">
+                        <button class="btn-primary" onclick="saveEmailSettings()">Save Changes</button>
+                        <button class="btn-secondary" onclick="testEmail()">Send Test Email</button>
+                    </div>
+                </div>
+
+                <!-- Backup & Data -->
+                <div class="settings-section">
+                    <h3>Backup & Data</h3>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Automatic Backup</div>
+                            <div class="setting-description">Enable automatic database backups</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Backup Frequency</div>
+                            <div class="setting-description">How often to backup</div>
+                        </div>
+                        <div class="setting-control">
+                            <select id="backup-frequency">
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Data Retention (days)</div>
+                            <div class="setting-description">Keep deleted items for specified days</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" id="data-retention" value="30" min="0">
+                        </div>
+                    </div>
+                    <div class="setting-buttons">
+                        <button class="btn-primary" onclick="saveBackupSettings()">Save Changes</button>
+                        <button class="btn-secondary" onclick="createBackup()">Create Backup Now</button>
+                        <button class="btn-secondary" onclick="exportData()">Export All Data</button>
+                    </div>
+                </div>
+
+                <!-- API Settings -->
+                <div class="settings-section">
+                    <h3>API Settings</h3>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">API Enabled</div>
+                            <div class="setting-description">Enable API access</div>
+                        </div>
+                        <div class="setting-control">
+                            <div class="toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Rate Limit (requests/hour)</div>
+                            <div class="setting-description">Maximum API requests per hour</div>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" id="rate-limit" value="1000" min="100">
+                        </div>
+                    </div>
+                    <div class="setting-buttons">
+                        <button class="btn-primary" onclick="saveApiSettings()">Save Changes</button>
+                        <button class="btn-secondary" onclick="regenerateApiKey()">Regenerate API Key</button>
+                    </div>
+                </div>
+
+                <!-- Appearance -->
+                <div class="settings-section">
+                    <h3>Appearance</h3>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Theme</div>
+                            <div class="setting-description">Choose your preferred theme</div>
+                        </div>
+                        <div class="setting-control">
+                            <select id="theme">
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                                <option value="auto">Auto</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-title">Date Format</div>
+                            <div class="setting-description">Display format for dates</div>
+                        </div>
+                        <div class="setting-control">
+                            <select id="date-format">
+                                <option value="dd.mm.yy">DD.MM.YY</option>
+                                <option value="mm/dd/yyyy">MM/DD/YYYY</option>
+                                <option value="yyyy-mm-dd">YYYY-MM-DD</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="setting-buttons">
+                        <button class="btn-primary" onclick="saveAppearanceSettings()">Save Changes</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Reports Page -->
+        <div id="reports-page" class="hidden">
+            <h2 class="page-title">Reports</h2>
+            <div class="empty-page">
+                <p>Reports page - Coming soon</p>
+            </div>
+        </div>
+    </main>
+<script src="js/AdminPage.js"></script>
+</body>
