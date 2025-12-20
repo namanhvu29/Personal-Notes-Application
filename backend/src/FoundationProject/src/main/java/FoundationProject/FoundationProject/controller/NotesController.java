@@ -7,6 +7,10 @@ import FoundationProject.FoundationProject.service.NotesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import FoundationProject.FoundationProject.repository.NoteLabelsRepository;
+import FoundationProject.FoundationProject.entity.NoteLabels;
+
+
 
 import java.util.List;
 
@@ -14,6 +18,11 @@ import java.util.List;
 @RequestMapping("/notes")
 @CrossOrigin(origins = "*")
 public class NotesController {
+
+
+
+    @Autowired
+    private NoteLabelsRepository noteLabelsRepository;
 
     @Autowired
     private NotesService notesService;
@@ -104,4 +113,27 @@ public class NotesController {
             return ResponseEntity.internalServerError().body("Lỗi tìm kiếm: " + e.getMessage());
         }
     }
+
+    @PostMapping("/{noteId}/labels")
+    public ResponseEntity<?> assignLabelsToNote(@PathVariable int noteId, @RequestBody List<Integer> labelIds) {
+        try {
+            // Sửa tên method delete theo camelCase
+            noteLabelsRepository.deleteByNoteId(noteId);
+
+            for (int labelId : labelIds) {
+                NoteLabels nl = new NoteLabels();
+                // Sửa setter theo camelCase
+                nl.setNoteId(noteId);
+                nl.setLabelId(labelId);
+                noteLabelsRepository.save(nl);
+            }
+            return ResponseEntity.ok("Đã cập nhật nhãn cho note!");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Lỗi khi gán nhãn: " + e.getMessage());
+        }
+    }
+
+
+
+
 }
