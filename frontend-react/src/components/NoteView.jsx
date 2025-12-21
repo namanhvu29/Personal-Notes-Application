@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SlashMenu from './SlashMenu';
 import CategorySelectionModal from './CategorySelectionModal';
+import AIAssist from './AIAssist';
 
 const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCategory, onAddCategory, onRenameCategory, onDeleteCategory }) => {
     const [title, setTitle] = useState('');
@@ -34,6 +35,30 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
             const currentContent = textareaRef.current ? textareaRef.current.innerHTML : content;
             onUpdateNote({ ...note, title, content: currentContent });
         }
+    };
+
+    // Handle AI result - replace selected text or entire content with AI processed text
+    const handleAIResult = (processedText) => {
+        if (!textareaRef.current || !processedText) return;
+
+        const selection = window.getSelection();
+        const selectedText = selection?.toString().trim();
+
+        if (selectedText && selectedText.length > 0) {
+            // Replace selected text
+            const range = selection.getRangeAt(0);
+            range.deleteContents();
+            const textNode = document.createTextNode(processedText);
+            range.insertNode(textNode);
+        } else {
+            // Replace entire content
+            textareaRef.current.innerHTML = processedText;
+        }
+
+        // Update state and save
+        const newContent = textareaRef.current.innerHTML;
+        setContent(newContent);
+        onUpdateNote({ ...note, title, content: newContent });
     };
 
 
@@ -361,6 +386,12 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
                     position={slashMenuPos}
                     onSelect={handleSlashSelect}
                     onClose={() => setShowSlashMenu(false)}
+                />
+
+                {/* AI Assist Component - positioned outside content area */}
+                <AIAssist
+                    noteContentRef={textareaRef}
+                    onApplyResult={handleAIResult}
                 />
 
                 <div

@@ -123,16 +123,33 @@ class CopilotAIAssist {
                         </button>
                     </div>
 
-                    <!-- Action Dropdown (moved below) -->
-                    <div class="ai-action-dropdown">
-                        <label for="aiActionSelect">CHỌN HÀNH ĐỘNG AI</label>
-                        <select id="aiActionSelect">
-                            <option value="">Chọn một tùy chọn...</option>
-                            <option value="expand">📝 Mở rộng - Mở rộng nội dung chi tiết hơn</option>
-                            <option value="summarize">📋 Tóm tắt - Rút gọn nội dung chính</option>
-                            <option value="proofread">✓ Sửa lỗi - Kiểm tra và sửa lỗi chính tả</option>
-                            <option value="translate">🌐 Dịch - Dịch sang ngôn ngữ khác</option>
-                        </select>
+                    <!-- Action Pills (Compact like Claude) -->
+                    <div class="ai-action-dropdown" id="aiActionDropdown">
+                        <div class="ai-action-buttons">
+                            <button type="button" class="ai-action-pill" data-action="expand">
+                                <span class="pill-icon">+</span>
+                                <span>Mở rộng</span>
+                                <span class="pill-expand">^</span>
+                            </button>
+                            <button type="button" class="ai-action-pill" data-action="summarize">
+                                <span class="pill-icon">^</span>
+                                <span>Tóm tắt</span>
+                            </button>
+                            <button type="button" class="ai-action-pill" data-action="proofread">
+                                <span class="pill-icon">✓</span>
+                                <span>Sửa lỗi</span>
+                            </button>
+                            <button type="button" class="ai-action-pill" data-action="translate">
+                                <span class="pill-icon">🌐</span>
+                                <span>Dịch</span>
+                            </button>
+                        </div>
+                        <input type="hidden" id="aiActionSelect" value="">
+                    </div>
+                    <!-- Warning for no action selected -->
+                    <div class="ai-action-warning" id="aiActionWarning">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        <span>Vui lòng chọn một hành động AI trước khi gửi</span>
                     </div>
 
                     <!-- Language Selector (for translate action) -->
@@ -174,11 +191,28 @@ class CopilotAIAssist {
         // Pen icon click - always visible, works with selected text or all content
         this.penIcon.addEventListener('click', () => this.showChatWidget());
 
-        // Action dropdown change - only show/hide language selector, don't execute
+        // Action pill buttons click handlers
+        const actionPills = document.querySelectorAll('.ai-action-pill');
         const actionSelect = document.getElementById('aiActionSelect');
-        if (actionSelect) {
-            actionSelect.addEventListener('change', (e) => {
-                const action = e.target.value;
+
+        actionPills.forEach(pill => {
+            pill.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const action = pill.dataset.action;
+
+                // Remove selected from all pills
+                actionPills.forEach(p => p.classList.remove('selected'));
+
+                // Add selected to clicked pill
+                pill.classList.add('selected');
+
+                // Update hidden input
+                actionSelect.value = action;
+
+                // Hide warning if shown
+                document.getElementById('aiActionWarning').classList.remove('show');
+                document.getElementById('aiActionDropdown').classList.remove('warning');
+
                 // Show language selector for translate, hide for others
                 if (action === 'translate') {
                     document.getElementById('aiChatLangSelector').style.display = 'block';
@@ -186,7 +220,7 @@ class CopilotAIAssist {
                     document.getElementById('aiChatLangSelector').style.display = 'none';
                 }
             });
-        }
+        });
 
         // Chat input auto-resize
         const chatInput = document.getElementById('aiChatInput');
@@ -256,8 +290,11 @@ class CopilotAIAssist {
         // Hide result if any
         this.hideResult();
 
-        // Reset dropdown
+        // Reset pill buttons and hidden input
+        document.querySelectorAll('.ai-action-pill').forEach(p => p.classList.remove('selected'));
         document.getElementById('aiActionSelect').value = '';
+        document.getElementById('aiActionWarning').classList.remove('show');
+        document.getElementById('aiActionDropdown').classList.remove('warning');
     }
 
     hideChatWidget() {
@@ -268,6 +305,9 @@ class CopilotAIAssist {
         document.getElementById('aiChatInput').value = '';
         document.getElementById('aiChatInput').rows = 1;
         document.getElementById('aiActionSelect').value = '';
+        document.querySelectorAll('.ai-action-pill').forEach(p => p.classList.remove('selected'));
+        document.getElementById('aiActionWarning').classList.remove('show');
+        document.getElementById('aiActionDropdown').classList.remove('warning');
     }
 
     autoResizeInput(textarea) {
@@ -288,9 +328,11 @@ class CopilotAIAssist {
         // Get fresh working text (selected or entire content)
         const workingText = this.getWorkingText().trim();
 
-        // Validate: need either action selected OR custom message
-        if (!selectedAction && !message) {
-            this.showError('Vui lòng chọn một hành động AI hoặc nhập yêu cầu tùy chỉnh');
+        // Validate: MUST select an action (required)
+        if (!selectedAction) {
+            // Show inline warning instead of alert
+            document.getElementById('aiActionWarning').classList.add('show');
+            document.getElementById('aiActionDropdown').classList.add('warning');
             return;
         }
 
