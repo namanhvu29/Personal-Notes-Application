@@ -3,12 +3,17 @@ package FoundationProject.FoundationProject.service;
 import FoundationProject.FoundationProject.dto.request.NotesCreationRequest;
 import FoundationProject.FoundationProject.dto.request.NotesUpdateRequest;
 import FoundationProject.FoundationProject.dto.response.NotesResponse;
+import FoundationProject.FoundationProject.entity.NoteMedia;
 import FoundationProject.FoundationProject.entity.Notes;
+import FoundationProject.FoundationProject.repository.NoteMediaRepository;
 import FoundationProject.FoundationProject.repository.NotesRepository;
 import FoundationProject.FoundationProject.repository.UsersRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,9 +26,14 @@ public class NotesService {
     @Autowired
     private UsersRepository usersRepository;
 
-    // Tạo note mới
+    @Autowired
+    private NoteMediaRepository noteMediaRepository;
+
+    // ============================================
+    // CREATE NOTE
+    // ============================================
     public NotesResponse createNote(NotesCreationRequest request) {
-        // Kiểm tra user tồn tại
+
         if (!usersRepository.existsById(request.getUser_id())) {
             throw new IllegalArgumentException("User không tồn tại!");
         }
@@ -31,8 +41,10 @@ public class NotesService {
         Notes note = new Notes();
         note.setUser_id(request.getUser_id());
 
-        // Xử lý title: nếu trùng thì thêm số thứ tự
-        String baseTitle = (request.getTitle() != null && !request.getTitle().isEmpty()) ? request.getTitle() : "Untitled";
+        // Xử lý title để tránh trùng
+        String baseTitle = (request.getTitle() != null && !request.getTitle().isEmpty())
+                ? request.getTitle() : "Untitled";
+
         String title = baseTitle;
         int counter = 1;
 
@@ -42,7 +54,6 @@ public class NotesService {
         }
         note.setTitle(title);
 
-        // Set content và trạng thái quan trọng
         note.setContent(request.getContent() != null ? request.getContent() : "");
         note.setIs_important(request.isIs_important());
 
@@ -50,50 +61,45 @@ public class NotesService {
         return convertToResponse(savedNote);
     }
 
-    // Lấy tất cả notes của user
+    // ============================================
+    // GET NOTES
+    // ============================================
     public List<NotesResponse> getNotesByUserId(int userId) {
-        List<Notes> notes = notesRepository.findByUserId(userId);
-        return notes.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
+        return notesRepository.findByUserId(userId)
+                .stream().map(this::convertToResponse).collect(Collectors.toList());
     }
 
-    // Lấy notes quan trọng
     public List<NotesResponse> getImportantNotes(int userId) {
-        List<Notes> notes = notesRepository.findByUserIdAndIsImportant(userId);
-        return notes.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
+        return notesRepository.findByUserIdAndIsImportant(userId)
+                .stream().map(this::convertToResponse).collect(Collectors.toList());
     }
 
-    // Lấy chi tiết note theo id
     public NotesResponse getNoteById(int noteId) {
         Notes note = notesRepository.findById(noteId)
                 .orElseThrow(() -> new RuntimeException("Note không tồn tại!"));
-        return convertToResponse(note);
+
+        NotesResponse res = convertToResponse(note);
+
+        // THÊM MEDIA FILES CHO NOTE
+        res.setMediaFiles(noteMediaRepository.findByNoteId(noteId));
+
+        return res;
     }
-    // lay full note
+
     public List<NotesResponse> getAllNotes() {
-        List<Notes> notes = notesRepository.findAll();
-        return notes.stream()
-                .map(n -> new NotesResponse(
-                        n.getNote_id(),
-                        n.getUser_id(),
-                        n.getTitle(),
-                        n.getContent(),
-                        n.isIs_important(),
-                        n.getCreated_at(),
-                        n.getUpdated_at()))
-                .toList();
+        return notesRepository.findAll()
+                .stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
-
-    // Cập nhật note
+    // ============================================
+    // UPDATE NOTE
+    // ============================================
     public NotesResponse updateNote(int noteId, NotesUpdateRequest request) {
         Notes note = notesRepository.findById(noteId)
                 .orElseThrow(() -> new RuntimeException("Note không tồn tại!"));
 
-        // 1. Update title nếu có
         if (request.getTitle() != null && !request.getTitle().isEmpty()) {
             String newTitle = request.getTitle();
 
@@ -105,38 +111,55 @@ public class NotesService {
             note.setTitle(newTitle);
         }
 
-        // 2. Update content
         if (request.getContent() != null) {
             note.setContent(request.getContent());
         }
 
-        // 3. Update trạng thái quan trọng
         note.setIs_important(request.isIs_important());
 
-        // 4. Lưu
         Notes updatedNote = notesRepository.save(note);
         return convertToResponse(updatedNote);
     }
 
-    // Xóa note
+    // ============================================
+    // DELETE NOTE + DELETE MEDIA
+    // ============================================
     public void deleteNote(int noteId) {
-        if (!notesRepository.existsById(noteId)) {
-            throw new RuntimeException("Note không tồn tại!");
+        Notes note = notesRepository.findById(noteId)
+                .orElseThrow(() -> new RuntimeException("Note không tồn tại!"));
+
+        List<NoteMedia> mediaList = noteMediaRepository.findByNoteId(noteId);
+
+        // Xóa file vật lý
+        for (NoteMedia media : mediaList) {
+            try {
+                Files.deleteIfExists(Paths.get(media.getFilePath()));
+            } catch (Exception ex) {
+                System.out.println("Không thể xóa file: " + media.getFilePath());
+            }
         }
-        notesRepository.deleteById(noteId);
+
+        // Xóa media trong DB
+        noteMediaRepository.deleteAll(mediaList);
+
+        // Xóa note
+        notesRepository.delete(note);
     }
 
-    // Tìm kiếm notes
+    // ============================================
+    // SEARCH NOTES
+    // ============================================
     public List<NotesResponse> searchNotes(int userId, String keyword) {
-        List<Notes> notes = notesRepository.searchNotes(userId, keyword);
-        return notes.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
+        return notesRepository.searchNotes(userId, keyword)
+                .stream().map(this::convertToResponse).collect(Collectors.toList());
     }
 
-    // Chuyển đổi entity -> response DTO
+    // ============================================
+    // CONVERT ENTITY -> DTO
+    // ============================================
     private NotesResponse convertToResponse(Notes note) {
-        return new NotesResponse(
+
+        NotesResponse res = new NotesResponse(
                 note.getNote_id(),
                 note.getUser_id(),
                 note.getTitle(),
@@ -145,5 +168,10 @@ public class NotesService {
                 note.getCreated_at(),
                 note.getUpdated_at()
         );
+
+        // THÊM MEDIA FILES CHO MỖI NOTE
+        res.setMediaFiles(noteMediaRepository.findByNoteId(note.getNote_id()));
+
+        return res;
     }
 }

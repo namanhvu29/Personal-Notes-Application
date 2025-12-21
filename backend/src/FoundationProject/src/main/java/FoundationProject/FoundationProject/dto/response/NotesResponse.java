@@ -1,8 +1,11 @@
 package FoundationProject.FoundationProject.dto.response;
 
+import FoundationProject.FoundationProject.entity.NoteMedia;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class NotesResponse {
+
     private int note_id;
     private int user_id;
     private String title;
@@ -11,7 +14,9 @@ public class NotesResponse {
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
 
-    // Constructor
+    //Danh sách file của note
+    private List<NoteMedia> mediaFiles;
+
     public NotesResponse() {}
 
     public NotesResponse(int note_id, int user_id, String title, String content,
@@ -25,7 +30,6 @@ public class NotesResponse {
         this.updated_at = updated_at;
     }
 
-    // Getters and Setters
     public int getNote_id() {
         return note_id;
     }
@@ -80,5 +84,13 @@ public class NotesResponse {
 
     public void setUpdated_at(LocalDateTime updated_at) {
         this.updated_at = updated_at;
+    }
+
+    public List<NoteMedia> getMediaFiles() {
+        return mediaFiles;
+    }
+
+    public void setMediaFiles(List<NoteMedia> mediaFiles) {
+        this.mediaFiles = mediaFiles;
     }
 }
