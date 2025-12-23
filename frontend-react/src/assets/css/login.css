@@ -1,7 +1,7 @@
 /* Toàn trang */
 .auth-container {
   font-family: 'Poppins', system-ui, sans-serif;
-  background: linear-gradient(135deg, #ffb347, #ffda79);
+  background: linear-gradient(135deg, #4facfe, #00f2fe); /* ĐÃ ĐỔI SANG XANH */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -63,13 +63,14 @@
 }
 
 .login-box input:focus {
-  border-color: #ffcd45;
-  box-shadow: 0 0 5px rgba(255, 205, 69, 0.5);
+  border-color: #007bff; /* ĐÃ ĐỔI */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
 /* Nút */
 .login-box button {
-  background: #ffda79;
+  background: #007bff; /* ĐÃ ĐỔI */
+  color: #ffffff;      /* Chữ trắng cho nổi bật trên nền xanh */
   border: none;
   padding: 12px;
   font-size: 16px;
@@ -80,7 +81,7 @@
 }
 
 .login-box button:hover {
-  background: #ffcd45;
+  background: #0056b3; /* Xanh đậm hơn khi hover */
   transform: translateY(-1px);
 }
 
@@ -110,7 +111,7 @@
 }
 
 .login-box a {
-  color: #ff9900;
+  color: #007bff; /* ĐÃ ĐỔI */
   text-decoration: none;
   font-weight: 600;
 }
