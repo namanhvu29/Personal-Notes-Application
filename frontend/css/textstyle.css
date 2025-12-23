@@ -1,0 +1,315 @@
+
+.formatting-toolbar {
+    position: fixed;
+    bottom: 0;
+    left: 280px; /* Width của sidebar */
+    right: 0;
+    background: #FFFFFF;
+    border-top: 2px solid #C8E6C9;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    overflow-x: auto;
+}
+
+.formatting-toolbar.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toolbar-section {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.toolbar-btn {
+    background: #F5F5F5;
+    border: 1px solid #E0E0E0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    min-width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.toolbar-btn:hover {
+    background: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+    transform: translateY(-1px);
+}
+
+.toolbar-btn:active {
+    transform: translateY(0);
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 30px;
+    background: #E0E0E0;
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+
+.clear-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    min-width: auto;
+}
+
+/* Heading Dropdown */
+.heading-dropdown {
+    position: relative;
+}
+
+.heading-menu {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    margin-bottom: 8px;
+    background: white;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    padding: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: none;
+    z-index: 1000;
+    min-width: 150px;
+}
+
+.heading-menu.show {
+    display: block;
+}
+
+.heading-option {
+    width: 100%;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+    font-size: 14px;
+}
+
+.heading-option:hover {
+    background: #E8F5E9;
+}
+
+/* Menu màu 2 cấp */
+.color-dropdown {
+    position: relative;
+}
+
+.color-trigger {
+    position: relative;
+}
+
+.color-menu {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    margin-bottom: 8px;
+    background: white;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: none;
+    z-index: 1000;
+    min-width: 200px;
+}
+
+.color-menu.show {
+    display: block;
+}
+
+.color-menu-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #E0E0E0;
+}
+
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+.highlight-grid {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.color-option,
+.highlight-option {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 2px solid #E0E0E0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.color-option:hover,
+.highlight-option:hover {
+    transform: scale(1.15);
+    border-color: #4CAF50;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.remove-highlight {
+    background: white;
+    border: 2px dashed #ddd;
+}
+
+/* Link Modal */
+.link-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+
+.link-modal.show {
+    display: flex;
+}
+
+.link-modal-content {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    min-width: 400px;
+}
+
+.link-modal-content h3 {
+    margin: 0 0 16px 0;
+    color: #333;
+}
+
+.link-modal-content input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+    border: 1px solid #E0E0E0;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.link-modal-content input:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+.link-modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.link-modal-actions button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.link-modal-actions button:first-child {
+    background: #4CAF50;
+    color: white;
+}
+
+.link-modal-actions button:first-child:hover {
+    background: #388E3C;
+}
+
+.link-modal-actions button:last-child {
+    background: #F5F5F5;
+    color: #333;
+}
+
+.link-modal-actions button:last-child:hover {
+    background: #E0E0E0;
+}
+
+/* Điều chỉnh note-view để có khoảng trống cho toolbar */
+.note-view {
+    padding-bottom: 80px;
+}
+
+/* Khi note content là contenteditable div */
+.note-content[contenteditable="true"] {
+    outline: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.note-content[contenteditable="true"]:focus {
+    outline: none;
+}
+
+.note-content[contenteditable="true"] a {
+    color: #4CAF50;
+    text-decoration: underline;
+}
+
+.note-content[contenteditable="true"] h1 {
+    font-size: 2em;
+    margin: 0.67em 0;
+}
+
+.note-content[contenteditable="true"] h2 {
+    font-size: 1.5em;
+    margin: 0.75em 0;
+}
+
+.note-content[contenteditable="true"] h3 {
+    font-size: 1.17em;
+    margin: 0.83em 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .formatting-toolbar {
+        left: 0;
+        padding: 10px;
+        gap: 8px;
+    }
+    
+    .toolbar-section {
+        gap: 4px;
+    }
+    
+    .link-modal-content {
+        min-width: 90%;
+    }
+}
