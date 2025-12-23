@@ -1,0 +1,145 @@
+
+<div class="formatting-toolbar" id="formattingToolbar">
+    <!-- Heading Dropdown -->
+    <div class="toolbar-section">
+        <div class="heading-dropdown">
+            <button class="toolbar-btn" id="headingBtn" title="Tiêu đề">
+                H ▾
+            </button>
+            <div class="heading-menu" id="headingMenu">
+                <button class="heading-option" onclick="applyHeading('p')">Bình thường</button>
+                <button class="heading-option" onclick="applyHeading('h1')">Heading 1</button>
+                <button class="heading-option" onclick="applyHeading('h2')">Heading 2</button>
+                <button class="heading-option" onclick="applyHeading('h3')">Heading 3</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <!-- Định dạng văn bản cơ bản -->
+    <div class="toolbar-section">
+        <button class="toolbar-btn" onclick="formatText('bold')" title="In đậm (Ctrl+B)">
+            <strong>B</strong>
+        </button>
+        <button class="toolbar-btn" onclick="formatText('italic')" title="In nghiêng (Ctrl+I)">
+            <em>I</em>
+        </button>
+        <button class="toolbar-btn" onclick="formatText('underline')" title="Gạch chân (Ctrl+U)">
+            <u>U</u>
+        </button>
+        <button class="toolbar-btn" onclick="formatText('strikeThrough')" title="Gạch ngang">
+            <s>S</s>
+        </button>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <!-- Danh sách -->
+    <div class="toolbar-section">
+        <button class="toolbar-btn" onclick="formatText('insertUnorderedList')" title="Danh sách dấu chấm">
+            • List
+        </button>
+        <button class="toolbar-btn" onclick="formatText('insertOrderedList')" title="Danh sách số">
+            1. List
+        </button>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <!-- Căn lề -->
+    <div class="toolbar-section">
+        <button class="toolbar-btn" onclick="formatText('justifyLeft')" title="Căn trái">
+            ☰
+        </button>
+        <button class="toolbar-btn" onclick="formatText('justifyCenter')" title="Căn giữa">
+            ☷
+        </button>
+        <button class="toolbar-btn" onclick="formatText('justifyRight')" title="Căn phải">
+            ☰
+        </button>
+        <button class="toolbar-btn" onclick="formatText('justifyFull')" title="Căn đều hai bên">
+            ☶
+        </button>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <!-- Màu chữ (Menu 2 cấp) -->
+    <div class="toolbar-section">
+        <div class="color-dropdown">
+            <button class="toolbar-btn color-trigger" id="textColorBtn" title="Màu chữ">
+                <span style="text-decoration: underline; text-decoration-color: #000000; text-decoration-thickness: 3px;">A</span>
+            </button>
+            <div class="color-menu" id="textColorMenu">
+                <div class="color-menu-title">Chọn màu chữ</div>
+                <div class="color-grid">
+                    <button class="color-option" data-color="#000000" style="background: #000000;" title="Đen"></button>
+                    <button class="color-option" data-color="#FFFFFF" style="background: #FFFFFF; border: 1px solid #ddd;" title="Trắng"></button>
+                    <button class="color-option" data-color="#808080" style="background: #808080;" title="Xám"></button>
+                    <button class="color-option" data-color="#FF0000" style="background: #FF0000;" title="Đỏ"></button>
+                    <button class="color-option" data-color="#FF8C00" style="background: #FF8C00;" title="Cam"></button>
+                    <button class="color-option" data-color="#FFD700" style="background: #FFD700;" title="Vàng"></button>
+                    <button class="color-option" data-color="#00FF00" style="background: #00FF00;" title="Xanh Lục"></button>
+                    <button class="color-option" data-color="#0000FF" style="background: #0000FF;" title="Xanh Lam"></button>
+                    <button class="color-option" data-color="#800080" style="background: #800080;" title="Tím"></button>
+                    <button class="color-option" data-color="#FFC0CB" style="background: #FFC0CB;" title="Hồng"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <!-- Highlight chữ (Menu 2 cấp) -->
+    <div class="toolbar-section">
+        <div class="color-dropdown">
+            <button class="toolbar-btn color-trigger" id="highlightBtn" title="Highlight">
+                <span style="background: #FFFF00; padding: 2px 6px; border-radius: 3px;">ab</span>
+            </button>
+            <div class="color-menu" id="highlightMenu">
+                <div class="color-menu-title">Chọn màu highlight</div>
+                <div class="color-grid highlight-grid">
+                    <button class="highlight-option" data-color="#FFFF00" style="background: #FFFF00;" title="Vàng"></button>
+                    <button class="highlight-option" data-color="#87CEEB" style="background: #87CEEB;" title="Xanh Da Trời"></button>
+                    <button class="highlight-option" data-color="#00FF7F" style="background: #00FF7F;" title="Xanh Neon"></button>
+                    <button class="highlight-option" data-color="#FFB6C1" style="background: #FFB6C1;" title="Hồng nhạt"></button>
+                    <button class="highlight-option remove-highlight" style="background: white; border: 2px solid #ddd;" title="Xóa highlight">
+                        <span style="color: #999; font-size: 18px;">✕</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <!-- Hyperlink -->
+    <div class="toolbar-section">
+        <button class="toolbar-btn" onclick="insertLink()" title="Chèn liên kết (Ctrl+K)">
+            🔗
+        </button>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <!-- Xóa định dạng -->
+    <div class="toolbar-section">
+        <button class="toolbar-btn clear-btn" onclick="clearFormatting()" title="Xóa định dạng">
+            🧹
+        </button>
+    </div>
+</div>
+
+<!-- Modal cho Hyperlink -->
+<div class="link-modal" id="linkModal">
+    <div class="link-modal-content">
+        <h3>Chèn liên kết</h3>
+        <input type="text" id="linkText" placeholder="Văn bản hiển thị" />
+        <input type="url" id="linkUrl" placeholder="https://example.com" />
+        <div class="link-modal-actions">
+            <button onclick="confirmLink()">Chèn</button>
+            <button onclick="closeLinkModal()">Hủy</button>
+        </div>
+    </div>
+</div>
