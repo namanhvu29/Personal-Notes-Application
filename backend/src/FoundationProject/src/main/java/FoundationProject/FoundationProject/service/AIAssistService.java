@@ -49,32 +49,39 @@ public class AIAssistService {
     private String buildPrompt(AIAssistRequest request) {
         String text = request.getText();
         String action = request.getAction();
+        
+        // Base instruction to avoid AI greetings/closings
+        String noGreetingsInstruction = "QUAN TRỌNG: Chỉ trả về kết quả thuần túy. KHÔNG được thêm bất kỳ lời chào, lời mở đầu (như 'Chào bạn', 'Dưới đây là...', 'Tuyệt vời!'), lời kết (như 'Bạn có muốn tôi làm gì nữa không?', 'Hy vọng điều này hữu ích'), hoặc giải thích/nhận xét nào. Chỉ trả về nội dung được yêu cầu.\n\n";
 
         switch (action.toLowerCase()) {
             case "summarize":
-                return "Hãy tóm tắt văn bản sau thành các điểm chính (bullet points) ngắn gọn nhưng đầy đủ ý nghĩa. " +
-                        "Chỉ trả về phần tóm tắt, không thêm giải thích:\n\n" + text;
+                return noGreetingsInstruction + 
+                        "Hãy tóm tắt văn bản sau thành các điểm chính (bullet points) ngắn gọn nhưng đầy đủ ý nghĩa. " +
+                        "Chỉ trả về phần tóm tắt, không thêm bất kỳ lời giới thiệu hay giải thích nào:\n\n" + text;
 
             case "proofread":
-                return "Hãy kiểm tra và sửa lỗi chính tả, ngữ pháp, dấu câu cho văn bản sau. " +
+                return noGreetingsInstruction + 
+                        "Hãy kiểm tra và sửa lỗi chính tả, ngữ pháp, dấu câu cho văn bản sau. " +
                         "Đề xuất cải thiện cách diễn đạt để câu văn rõ ràng và chuyên nghiệp hơn. " +
-                        "Chỉ trả về văn bản đã được sửa, không giải thích:\n\n" + text;
+                        "Chỉ trả về văn bản đã được sửa, không giải thích hay nhận xét gì:\n\n" + text;
 
             case "translate":
                 String targetLang = request.getTargetLanguage() != null ? request.getTargetLanguage() : "en";
                 String langName = getLanguageName(targetLang);
-                return "Hãy dịch văn bản sau sang " + langName + " một cách tự nhiên và chính xác. " +
-                        "Chỉ trả về bản dịch, không thêm giải thích:\n\n" + text;
+                return noGreetingsInstruction + 
+                        "Hãy dịch văn bản sau sang " + langName + " một cách tự nhiên và chính xác. " +
+                        "Chỉ trả về bản dịch, không thêm bất kỳ lời giới thiệu, giải thích hay chú thích nào:\n\n" + text;
 
             case "expand":
-                return "Dựa trên ý tưởng/câu sau, hãy mở rộng thành các đoạn văn chi tiết hoặc danh sách ý tưởng liên quan. "
-                        +
-                        "Làm cho nội dung phong phú và hữu ích hơn:\n\n" + text;
+                return noGreetingsInstruction + 
+                        "Dựa trên ý tưởng/câu sau, hãy mở rộng thành các đoạn văn chi tiết hoặc danh sách ý tưởng liên quan. " +
+                        "Làm cho nội dung phong phú và hữu ích hơn. Chỉ trả về nội dung mở rộng, không thêm lời mở đầu hay kết thúc:\n\n" + text;
 
             default:
-                return "Hãy xử lý văn bản sau:\n\n" + text;
+                return noGreetingsInstruction + "Hãy xử lý văn bản sau:\n\n" + text;
         }
     }
+
 
     private String getLanguageName(String langCode) {
         Map<String, String> languages = new HashMap<>();

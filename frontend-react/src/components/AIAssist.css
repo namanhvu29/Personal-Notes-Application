@@ -1,8 +1,4 @@
-/* ==================== COPILOT PEN ICON (Fixed in Textarea) ==================== */
-.note-content-wrapper {
-    position: relative;
-}
-
+/* ==================== AI COPILOT PEN ICON ==================== */
 .ai-copilot-pen {
     position: absolute;
     display: flex;
@@ -10,16 +6,17 @@
     justify-content: center;
     width: 28px;
     height: 28px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
     border-radius: 6px;
     cursor: pointer;
     z-index: 100;
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
     transition: all 0.2s ease;
-    color: white;
-    left: 8px;
-    bottom: auto;
-    top: calc(3.5em + 30px);
+    color: white !important;
+    left: -40px;
+    top: calc(2.5em + 20px + 20px + 10px);
+    border: none;
+    padding: 0;
 }
 
 .ai-copilot-pen:hover {
@@ -28,17 +25,20 @@
 }
 
 .ai-copilot-pen svg {
+    width: 16px;
+    height: 16px;
+    fill: white;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 /* ==================== COPILOT CHAT WIDGET ==================== */
 .ai-copilot-chat {
     position: absolute;
-    display: none;
     z-index: 9998;
     min-width: 400px;
     max-width: 500px;
     animation: slideIn 0.2s ease-out;
+    left: 0;
 }
 
 @keyframes slideIn {
@@ -61,7 +61,7 @@
     overflow: hidden;
 }
 
-/* ==================== CHAT INPUT AREA (Now at top) ==================== */
+/* ==================== CHAT INPUT AREA ==================== */
 .ai-chat-input-wrapper {
     display: flex;
     align-items: flex-end;
@@ -108,6 +108,7 @@
     cursor: pointer;
     color: white;
     transition: all 0.2s ease;
+    padding: 0;
 }
 
 .ai-chat-send:hover {
@@ -119,7 +120,7 @@
     transform: scale(0.95);
 }
 
-/* ==================== ACTION DROPDOWN (Compact Inline Style like Claude) ==================== */
+/* ==================== ACTION DROPDOWN ==================== */
 .ai-action-dropdown {
     display: flex;
     align-items: center;
@@ -132,12 +133,10 @@
     display: none;
 }
 
-/* Hidden select - we'll use custom buttons instead */
 .ai-action-dropdown select {
     display: none;
 }
 
-/* Compact action buttons container */
 .ai-action-buttons {
     display: flex;
     align-items: center;
@@ -145,7 +144,6 @@
     flex-wrap: wrap;
 }
 
-/* Individual action pill button */
 .ai-action-pill {
     display: inline-flex;
     align-items: center;
@@ -183,15 +181,7 @@
     margin-left: 2px;
 }
 
-/* Separator */
-.ai-action-separator {
-    width: 1px;
-    height: 14px;
-    background: #404040;
-    margin: 0 4px;
-}
-
-/* Warning state when no action selected */
+/* Warning state */
 .ai-action-dropdown.warning {
     background: rgba(255, 152, 0, 0.1);
     border-radius: 0 0 8px 8px;
@@ -243,7 +233,7 @@
 
 /* ==================== LOADING INDICATOR ==================== */
 .ai-chat-loading {
-    display: none;
+    display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
@@ -275,7 +265,6 @@
 
 /* ==================== RESULT AREA ==================== */
 .ai-chat-result {
-    display: none;
     background: #2b2b2b;
     border-top: 1px solid #404040;
     animation: resultSlideDown 0.3s ease-out;
@@ -313,7 +302,7 @@
 }
 
 .ai-result-text::-webkit-scrollbar-track {
-    background: #f1f3f5;
+    background: #2a2a2a;
     border-radius: 3px;
 }
 
@@ -390,15 +379,6 @@
         max-width: calc(100vw - 32px);
     }
 
-    .ai-quick-actions {
-        gap: 6px;
-        padding: 8px;
-    }
-
-    .ai-quick-btn {
-        height: 32px;
-    }
-
     .ai-chat-input-wrapper {
         padding: 10px;
     }
@@ -410,7 +390,6 @@
 }
 
 /* ==================== ACCESSIBILITY ==================== */
-.ai-quick-btn:focus,
 .ai-chat-send:focus,
 .ai-result-btn:focus {
     outline: 2px solid #667eea;
@@ -419,72 +398,4 @@
 
 .ai-chat-input:focus-visible {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-/* ==================== DARK MODE SUPPORT (OPTIONAL) ==================== */
-@media (prefers-color-scheme: dark) {
-    .ai-copilot-pen {
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.6);
-    }
-
-    .ai-chat-container {
-        background: #1e1e1e;
-        border-color: #333;
-    }
-
-    .ai-quick-actions {
-        background: #2a2a2a;
-        border-bottom-color: #444;
-    }
-
-    .ai-quick-btn {
-        background: #333;
-        border-color: #444;
-        color: #e0e0e0;
-    }
-
-    .ai-quick-btn:hover {
-        background: #667eea;
-        color: white;
-    }
-
-    .ai-chat-input-wrapper {
-        background: #1e1e1e;
-    }
-
-    .ai-chat-input {
-        background: #2a2a2a;
-        border-color: #444;
-        color: #e0e0e0;
-    }
-
-    .ai-chat-input::placeholder {
-        color: #6c757d;
-    }
-
-    .ai-chat-loading {
-        background: #2a2a2a;
-        border-top-color: #444;
-    }
-
-    .ai-chat-result {
-        background: #2a2a2a;
-        border-top-color: #444;
-    }
-
-    .ai-result-text {
-        background: #1e1e1e;
-        border-color: #444;
-        color: #e0e0e0;
-    }
-
-    .ai-result-cancel {
-        background: #333;
-        color: #e0e0e0;
-        border-color: #444;
-    }
-
-    .ai-result-cancel:hover {
-        background: #444;
-    }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SlashMenu from './SlashMenu';
 import CategorySelectionModal from './CategorySelectionModal';
+import AIAssist from './AIAssist';
 
 const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCategory, onAddCategory, onRenameCategory, onDeleteCategory }) => {
     const [title, setTitle] = useState('');
@@ -31,7 +32,36 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
         }
     };
 
+<<<<<<< HEAD
     // Xử lý click vào checkbox và tải file
+=======
+    // Handle AI result - replace selected text or entire content with AI processed text
+    const handleAIResult = (processedText) => {
+        if (!textareaRef.current || !processedText) return;
+
+        const selection = window.getSelection();
+        const selectedText = selection?.toString().trim();
+
+        if (selectedText && selectedText.length > 0) {
+            // Replace selected text
+            const range = selection.getRangeAt(0);
+            range.deleteContents();
+            const textNode = document.createTextNode(processedText);
+            range.insertNode(textNode);
+        } else {
+            // Replace entire content
+            textareaRef.current.innerHTML = processedText;
+        }
+
+        // Update state and save
+        const newContent = textareaRef.current.innerHTML;
+        setContent(newContent);
+        onUpdateNote({ ...note, title, content: newContent });
+    };
+
+
+
+>>>>>>> main
     const handleClick = (e) => {
         if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
             if (e.target.checked) {
@@ -179,10 +209,43 @@ const handleKeyDown = (e) => {
                 </div>
             </div>
 
+<<<<<<< HEAD
             <div className="note-content-wrapper">
                 <input className="note-title" placeholder="Tiêu đề..." value={title} onChange={(e) => setTitle(e.target.value)} onBlur={handleSave} />
                 <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} />
                 <SlashMenu isOpen={showSlashMenu} position={slashMenuPos} onSelect={handleSlashSelect} onClose={() => setShowSlashMenu(false)} />
+=======
+            <div className="note-content-wrapper" style={{ position: 'relative' }}>
+                <input
+                    id="noteTitle"
+                    className="note-title"
+                    placeholder="Tiêu đề ghi chú..."
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    onBlur={handleSave}
+                />
+
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    onChange={handleFileUpload}
+                />
+
+                <SlashMenu
+                    isOpen={showSlashMenu}
+                    position={slashMenuPos}
+                    onSelect={handleSlashSelect}
+                    onClose={() => setShowSlashMenu(false)}
+                />
+
+                {/* AI Assist Component - positioned outside content area */}
+                <AIAssist
+                    noteContentRef={textareaRef}
+                    onApplyResult={handleAIResult}
+                />
+
+>>>>>>> main
                 <div
                     ref={textareaRef}
                     className="note-content"

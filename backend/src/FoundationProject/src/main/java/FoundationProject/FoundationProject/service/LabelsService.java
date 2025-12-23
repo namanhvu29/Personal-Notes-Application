@@ -31,4 +31,9 @@ public class LabelsService {
     public void deleteLabel(int labelId) {
         labelsRepository.deleteById(labelId);
     }
+
+    public List<Labels> getAllLabels() {
+        return labelsRepository.findAll();
+    }
+
 }
