@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import SlashMenu from './SlashMenu';
 import CategorySelectionModal from './CategorySelectionModal';
 import AIAssist from './AIAssist';
+import FormattingToolbar from './FormattingToolbar';
 
 const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCategory, onAddCategory, onRenameCategory, onDeleteCategory }) => {
     const [title, setTitle] = useState('');
@@ -66,6 +67,24 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
             setContent(newContent);
             onUpdateNote({ ...note, title, content: newContent });
         }
+
+        // Handle link clicks
+        const link = e.target.closest('a');
+        if (link && textareaRef.current.contains(link)) {
+            // If Ctrl key is pressed or it's a direct click (depending on preference, usually editors require Ctrl+Click)
+            // But user asked "cant click to open", implying they expect direct click or easy way.
+            // Since it's contentEditable, direct click focuses. 
+            // Let's allow opening if it's a link. 
+            // To prevent interfering with editing, maybe require Ctrl+Click? 
+            // Or just open it? If we just open it, editing the link text becomes hard.
+            // Let's try to detect if it was a "navigation" intent.
+            // Standard behavior in many editors: Ctrl+Click to open.
+            // User said "cant click to open", maybe they tried clicking and nothing happened.
+
+            if (e.ctrlKey || e.metaKey) {
+                window.open(link.href, '_blank');
+            }
+        }
     };
 
     // Thay thế hàm handleKeyDown cũ bằng đoạn này
@@ -115,7 +134,11 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
                     setShowSlashMenu(true);
                     try {
                         const rect = range.getBoundingClientRect();
-                        setSlashMenuPos({ top: `${rect.bottom + 5}px`, left: `${rect.left}px` });
+                        const wrapperRect = textareaRef.current.parentElement.getBoundingClientRect();
+                        setSlashMenuPos({
+                            top: `${rect.bottom - wrapperRect.top + 5}px`,
+                            left: `${rect.left - wrapperRect.left}px`
+                        });
                     } catch (err) {
                         setSlashMenuPos({ top: '150px', left: '20px' });
                     }
@@ -202,47 +225,54 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
                 </div>
             </div>
 
-            <div className="note-content-wrapper" style={{ position: 'relative' }}>
-                <input
-                    id="noteTitle"
-                    className="note-title"
-                    placeholder="Tiêu đề ghi chú..."
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    onBlur={handleSave}
-                />
+            <div className="note-scroll-container">
+                <div className="note-content-wrapper" style={{ position: 'relative' }}>
+                    <input
+                        id="noteTitle"
+                        className="note-title"
+                        placeholder="Tiêu đề ghi chú..."
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        onBlur={handleSave}
+                    />
 
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    style={{ display: 'none' }}
-                    onChange={handleFileUpload}
-                />
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleFileUpload}
+                    />
 
-                <SlashMenu
-                    isOpen={showSlashMenu}
-                    position={slashMenuPos}
-                    onSelect={handleSlashSelect}
-                    onClose={() => setShowSlashMenu(false)}
-                />
+                    <SlashMenu
+                        isOpen={showSlashMenu}
+                        position={slashMenuPos}
+                        onSelect={handleSlashSelect}
+                        onClose={() => setShowSlashMenu(false)}
+                    />
 
-                {/* AI Assist Component - positioned outside content area */}
-                <AIAssist
-                    noteContentRef={textareaRef}
-                    onApplyResult={handleAIResult}
-                />
-                <div
-                    ref={textareaRef}
-                    className="note-content"
-                    contentEditable={true}
-                    suppressContentEditableWarning={true}
-                    data-placeholder="Nội dung ghi chú"
-                    onInput={handleContentChange}
-                    onClick={handleClick}
-                    onKeyDown={handleKeyDown}
-                    onBlur={handleSave}
-                    style={{ outline: 'none', minHeight: '300px' }}
-                ></div>
+                    {/* AI Assist Component - positioned outside content area */}
+                    <AIAssist
+                        noteContentRef={textareaRef}
+                        onApplyResult={handleAIResult}
+                    />
+                    <div
+                        ref={textareaRef}
+                        className="note-content"
+                        contentEditable={true}
+                        suppressContentEditableWarning={true}
+                        data-placeholder="Nội dung ghi chú"
+                        onInput={handleContentChange}
+                        onClick={handleClick}
+                        onKeyDown={handleKeyDown}
+                        onBlur={handleSave}
+                        style={{ outline: 'none', minHeight: '300px' }}
+                    ></div>
+                </div>
+            </div>
+
+            {/* Formatting Toolbar - Moved to bottom */}
+            <div className="toolbar-container">
+                <FormattingToolbar editorRef={textareaRef} />
             </div>
 
             <CategorySelectionModal
