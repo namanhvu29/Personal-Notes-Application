@@ -1,6 +1,6 @@
 /* ==================== AI COPILOT PEN ICON ==================== */
 .ai-copilot-pen {
-    position: absolute;
+    position: sticky;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -13,8 +13,13 @@
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
     transition: all 0.2s ease;
     color: white !important;
-    left: -40px;
-    top: calc(2.5em + 20px + 20px + 10px);
+
+    /* Sticky positioning */
+    top: 120px;
+    align-self: flex-start;
+    margin-left: -45px;
+    margin-bottom: -28px;
+    /* Prevent taking up vertical space */
     border: none;
     padding: 0;
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import SlashMenu from './SlashMenu';
 import CategorySelectionModal from './CategorySelectionModal';
 import AIAssist from './AIAssist';
+import FormattingToolbar from './FormattingToolbar';
 
 const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCategory, onAddCategory, onRenameCategory, onDeleteCategory }) => {
     const [title, setTitle] = useState('');
@@ -66,6 +67,24 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
             setContent(newContent);
             onUpdateNote({ ...note, title, content: newContent });
         }
+
+        // Handle link clicks
+        const link = e.target.closest('a');
+        if (link && textareaRef.current.contains(link)) {
+            // If Ctrl key is pressed or it's a direct click (depending on preference, usually editors require Ctrl+Click)
+            // But user asked "cant click to open", implying they expect direct click or easy way.
+            // Since it's contentEditable, direct click focuses. 
+            // Let's allow opening if it's a link. 
+            // To prevent interfering with editing, maybe require Ctrl+Click? 
+            // Or just open it? If we just open it, editing the link text becomes hard.
+            // Let's try to detect if it was a "navigation" intent.
+            // Standard behavior in many editors: Ctrl+Click to open.
+            // User said "cant click to open", maybe they tried clicking and nothing happened.
+
+            if (e.ctrlKey || e.metaKey) {
+                window.open(link.href, '_blank');
+            }
+        }
     };
 
     // Thay thế hàm handleKeyDown cũ bằng đoạn này
@@ -115,7 +134,11 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
                     setShowSlashMenu(true);
                     try {
                         const rect = range.getBoundingClientRect();
-                        setSlashMenuPos({ top: `${rect.bottom + 5}px`, left: `${rect.left}px` });
+                        const wrapperRect = textareaRef.current.parentElement.getBoundingClientRect();
+                        setSlashMenuPos({
+                            top: `${rect.bottom - wrapperRect.top + 5}px`,
+                            left: `${rect.left - wrapperRect.left}px`
+                        });
                     } catch (err) {
                         setSlashMenuPos({ top: '150px', left: '20px' });
                     }
@@ -225,6 +248,9 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
                     onSelect={handleSlashSelect}
                     onClose={() => setShowSlashMenu(false)}
                 />
+
+                {/* Formatting Toolbar */}
+                <FormattingToolbar editorRef={textareaRef} />
 
                 {/* AI Assist Component - positioned outside content area */}
                 <AIAssist
