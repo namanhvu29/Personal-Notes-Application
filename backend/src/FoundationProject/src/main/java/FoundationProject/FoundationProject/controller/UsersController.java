@@ -8,12 +8,15 @@ import FoundationProject.FoundationProject.dto.request.VerifyResetCodeRequest;
 import FoundationProject.FoundationProject.dto.request.ResetPasswordRequest;
 import FoundationProject.FoundationProject.entity.Users;
 import FoundationProject.FoundationProject.service.UsersService;
+import FoundationProject.FoundationProject.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -25,6 +28,9 @@ public class UsersController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     // ĐĂNG KÝ NGƯỜI DÙNG
     @PostMapping("/register")
@@ -39,7 +45,7 @@ public class UsersController {
         }
     }
 
-    // ĐĂNG NHẬP NGƯỜI DÙNG
+    // ĐĂNG NHẬP NGƯỜI DÙNG - Trả về JWT Token
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UsersLoginRequest request) {
         try {
@@ -52,7 +58,20 @@ public class UsersController {
                 return ResponseEntity.badRequest().body("Sai mật khẩu!");
             }
 
-            return ResponseEntity.ok("Đăng nhập thành công!");
+            // Tạo JWT Token
+            String role = user.getRole() != null ? user.getRole() : "USER";
+            String token = jwtTokenProvider.generateToken(user.getUsername(), role);
+
+            // Trả về thông tin user + token
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Đăng nhập thành công!");
+            response.put("token", token);
+            response.put("user_id", user.getUser_id());
+            response.put("username", user.getUsername());
+            response.put("email", user.getEmail());
+            response.put("role", role);
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Lỗi hệ thống: " + e.getMessage());
         }

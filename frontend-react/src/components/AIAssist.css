@@ -15,7 +15,7 @@
     color: white !important;
 
     /* Sticky positioning */
-    top: 120px;
+    top: 0;
     align-self: flex-start;
     margin-left: -45px;
     margin-bottom: -28px;
