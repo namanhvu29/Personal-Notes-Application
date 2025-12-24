@@ -117,7 +117,11 @@ const DashboardPage = () => {
                 notes={filteredNotes}
                 onSelectNote={handleSelectNote}
                 onAddNote={handleAddNote}
-                onLogout={() => navigate('/login')}
+                onLogout={() => {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('currentUser');
+                    navigate('/login');
+                }}
                 onOpenTrash={() => setIsTrashOpen(true)}
                 searchQuery={searchQuery}
                 onSearch={setSearchQuery}

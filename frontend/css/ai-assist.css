@@ -19,7 +19,7 @@
     color: white;
     left: 8px;
     bottom: auto;
-    top: calc(3.5em + 30px);
+    top: 0;
 }
 
 .ai-copilot-pen:hover {
