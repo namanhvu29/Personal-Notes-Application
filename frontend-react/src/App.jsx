@@ -4,6 +4,19 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminPage from './pages/AdminPage';
 
+// Protected Route Component
+const ProtectedRoute = ({ children, role }) => {
+  const userRole = localStorage.getItem('userRole');
+
+  if (!userRole) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (role && userRole !== role) {
+    // If user tries to access admin page but is not admin
+    if (role === 'ADMIN' && userRole !== 'ADMIN') {
+      return <Navigate to="/dashboard" replace />;
+    }
 // Component kiểm tra đăng nhập
 const PrivateRoute = ({ children }) => {
   const currentUser = localStorage.getItem('currentUser');
@@ -34,6 +47,28 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <AdminPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="/" element={<Navigate to="/login" replace />} />
         {/* Public routes - redirect đến dashboard nếu đã đăng nhập */}
         <Route path="/login" element={
           <PublicRoute>

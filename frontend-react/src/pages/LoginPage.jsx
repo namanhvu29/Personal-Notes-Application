@@ -47,6 +47,22 @@ const LoginPage = () => {
 
     const handleLoginSubmit = async (e) => {
         e.preventDefault();
+
+        // Mock Login Logic
+        const { username, password } = loginData;
+
+        // Check for Admin
+        if ((username === 'admin1' || username === 'admin2' || username === 'admin3') && password === '123') {
+            console.log('Logged in as Admin');
+            localStorage.setItem('userRole', 'ADMIN');
+            localStorage.setItem('username', username);
+            navigate('/admin');
+        } else {
+            // Default to User for any other input (Mock)
+            console.log('Logged in as User');
+            localStorage.setItem('userRole', 'USER');
+            localStorage.setItem('username', username);
+            navigate('/dashboard');
         setIsLoading(true);
         setMessage({ text: 'Đang đăng nhập...', type: 'info' });
 
