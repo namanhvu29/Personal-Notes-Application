@@ -15,10 +15,23 @@ const LoginPage = () => {
 
     const handleLoginSubmit = (e) => {
         e.preventDefault();
-        // TODO: Implement API call
-        console.log('Login:', loginData);
-        // Mock success
-        navigate('/dashboard');
+
+        // Mock Login Logic
+        const { username, password } = loginData;
+
+        // Check for Admin
+        if ((username === 'admin1' || username === 'admin2' || username === 'admin3') && password === '123') {
+            console.log('Logged in as Admin');
+            localStorage.setItem('userRole', 'ADMIN');
+            localStorage.setItem('username', username);
+            navigate('/admin');
+        } else {
+            // Default to User for any other input (Mock)
+            console.log('Logged in as User');
+            localStorage.setItem('userRole', 'USER');
+            localStorage.setItem('username', username);
+            navigate('/dashboard');
+        }
     };
 
     const handleForgotSubmit = (e) => {
