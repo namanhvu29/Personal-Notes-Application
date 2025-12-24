@@ -325,12 +325,13 @@ body {
 /* ========================================================= */
 .note-view {
   flex: 1;
-  padding: 20px 40px;
-  /* Vẫn giữ padding tổng thể cho note-view */
+  padding: 0;
+  /* Remove padding from main container */
   background: #ffffff;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow-y: hidden;
+  /* Hide overflow on main container */
 }
 
 .note-header {
@@ -340,9 +341,17 @@ body {
   align-items: center;
   margin-bottom: 20px;
   /* Khoảng cách với nội dung */
-  padding-right: 40px;
-  /* Đồng bộ padding với nội dung */
-  /* Remove padding-left: 40px; if it was there */
+  padding: 20px 40px 0 40px;
+  /* Add padding to header */
+}
+
+.note-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 40px;
+  /* Add padding to scroll container */
+  display: flex;
+  flex-direction: column;
 }
 
 /* THÊM MỚI: Định dạng cho wrapper nội dung */
@@ -1134,13 +1143,24 @@ body {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 5px;
-  margin-bottom: 15px;
+  margin: 10px auto 20px auto;
+  /* Center and add spacing */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 5px;
-  position: sticky;
-  top: 0;
+  /* Remove sticky positioning */
+  /* position: sticky; */
+  /* top: 0; */
   z-index: 10;
+  max-width: 700px;
+  /* Match content width */
+  width: 100%;
+}
+
+.toolbar-container {
+  padding: 0 40px;
+  background: white;
+  border-top: 1px solid #f0f0f0;
 }
 
 .toolbar-section {
@@ -1191,7 +1211,9 @@ body {
 .heading-menu,
 .color-menu {
   position: absolute;
-  top: 100%;
+  bottom: 100%;
+  /* Open upwards */
+  top: auto;
   left: 0;
   background: white;
   border: 1px solid #ddd;
@@ -1201,6 +1223,8 @@ body {
   z-index: 100;
   min-width: 150px;
   display: none;
+  margin-bottom: 5px;
+  /* Add spacing from button */
 }
 
 .heading-menu.show,

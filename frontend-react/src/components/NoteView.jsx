@@ -225,50 +225,54 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
                 </div>
             </div>
 
-            <div className="note-content-wrapper" style={{ position: 'relative' }}>
-                <input
-                    id="noteTitle"
-                    className="note-title"
-                    placeholder="Tiêu đề ghi chú..."
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    onBlur={handleSave}
-                />
+            <div className="note-scroll-container">
+                <div className="note-content-wrapper" style={{ position: 'relative' }}>
+                    <input
+                        id="noteTitle"
+                        className="note-title"
+                        placeholder="Tiêu đề ghi chú..."
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        onBlur={handleSave}
+                    />
 
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    style={{ display: 'none' }}
-                    onChange={handleFileUpload}
-                />
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleFileUpload}
+                    />
 
-                <SlashMenu
-                    isOpen={showSlashMenu}
-                    position={slashMenuPos}
-                    onSelect={handleSlashSelect}
-                    onClose={() => setShowSlashMenu(false)}
-                />
+                    <SlashMenu
+                        isOpen={showSlashMenu}
+                        position={slashMenuPos}
+                        onSelect={handleSlashSelect}
+                        onClose={() => setShowSlashMenu(false)}
+                    />
 
-                {/* Formatting Toolbar */}
+                    {/* AI Assist Component - positioned outside content area */}
+                    <AIAssist
+                        noteContentRef={textareaRef}
+                        onApplyResult={handleAIResult}
+                    />
+                    <div
+                        ref={textareaRef}
+                        className="note-content"
+                        contentEditable={true}
+                        suppressContentEditableWarning={true}
+                        data-placeholder="Nội dung ghi chú"
+                        onInput={handleContentChange}
+                        onClick={handleClick}
+                        onKeyDown={handleKeyDown}
+                        onBlur={handleSave}
+                        style={{ outline: 'none', minHeight: '300px' }}
+                    ></div>
+                </div>
+            </div>
+
+            {/* Formatting Toolbar - Moved to bottom */}
+            <div className="toolbar-container">
                 <FormattingToolbar editorRef={textareaRef} />
-
-                {/* AI Assist Component - positioned outside content area */}
-                <AIAssist
-                    noteContentRef={textareaRef}
-                    onApplyResult={handleAIResult}
-                />
-                <div
-                    ref={textareaRef}
-                    className="note-content"
-                    contentEditable={true}
-                    suppressContentEditableWarning={true}
-                    data-placeholder="Nội dung ghi chú"
-                    onInput={handleContentChange}
-                    onClick={handleClick}
-                    onKeyDown={handleKeyDown}
-                    onBlur={handleSave}
-                    style={{ outline: 'none', minHeight: '300px' }}
-                ></div>
             </div>
 
             <CategorySelectionModal
