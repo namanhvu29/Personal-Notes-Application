@@ -236,6 +236,7 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
                     className="note-content"
                     contentEditable={true}
                     suppressContentEditableWarning={true}
+                    data-placeholder="Nội dung ghi chú"
                     onInput={handleContentChange}
                     onClick={handleClick}
                     onKeyDown={handleKeyDown}
