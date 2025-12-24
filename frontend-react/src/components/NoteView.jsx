@@ -32,9 +32,6 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
         }
     };
 
-<<<<<<< HEAD
-    // Xử lý click vào checkbox và tải file
-=======
     // Handle AI result - replace selected text or entire content with AI processed text
     const handleAIResult = (processedText) => {
         if (!textareaRef.current || !processedText) return;
@@ -58,10 +55,6 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
         setContent(newContent);
         onUpdateNote({ ...note, title, content: newContent });
     };
-
-
-
->>>>>>> main
     const handleClick = (e) => {
         if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
             if (e.target.checked) {
@@ -76,38 +69,38 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
     };
 
     // Thay thế hàm handleKeyDown cũ bằng đoạn này
-const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-        const selection = window.getSelection();
-        const range = selection.getRangeAt(0);
-        let currentBlock = range.startContainer;
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            let currentBlock = range.startContainer;
 
-        while (currentBlock && currentBlock.parentNode !== textareaRef.current && currentBlock !== textareaRef.current) {
-            currentBlock = currentBlock.parentNode;
+            while (currentBlock && currentBlock.parentNode !== textareaRef.current && currentBlock !== textareaRef.current) {
+                currentBlock = currentBlock.parentNode;
+            }
+
+            const hasCheckbox = currentBlock instanceof Element && currentBlock.querySelector('input[type="checkbox"]');
+
+            if (hasCheckbox) {
+                e.preventDefault();
+                const newCheckboxLine = document.createElement("div");
+                // Thêm nbsp; để đảm bảo con trỏ có chỗ đứng
+                newCheckboxLine.innerHTML = '<input type="checkbox" style="margin-right: 5px;">&nbsp;';
+
+                currentBlock.parentNode.insertBefore(newCheckboxLine, currentBlock.nextSibling);
+
+                const newRange = document.createRange();
+                newRange.setStart(newCheckboxLine, 1); // Đặt con trỏ sau checkbox
+                newRange.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(newRange);
+
+                const newContent = textareaRef.current.innerHTML;
+                setContent(newContent);
+                onUpdateNote({ ...note, title, content: newContent });
+            }
         }
-
-        const hasCheckbox = currentBlock instanceof Element && currentBlock.querySelector('input[type="checkbox"]');
-
-        if (hasCheckbox) {
-            e.preventDefault();
-            const newCheckboxLine = document.createElement("div");
-            // Thêm nbsp; để đảm bảo con trỏ có chỗ đứng
-            newCheckboxLine.innerHTML = '<input type="checkbox" style="margin-right: 5px;">&nbsp;';
-            
-            currentBlock.parentNode.insertBefore(newCheckboxLine, currentBlock.nextSibling);
-
-            const newRange = document.createRange();
-            newRange.setStart(newCheckboxLine, 1); // Đặt con trỏ sau checkbox
-            newRange.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(newRange);
-
-            const newContent = textareaRef.current.innerHTML;
-            setContent(newContent);
-            onUpdateNote({ ...note, title, content: newContent });
-        }
-    }
-};
+    };
 
     const handleContentChange = (e) => {
         const newVal = e.target.innerHTML;
@@ -189,7 +182,7 @@ const handleKeyDown = (e) => {
         setShowSlashMenu(false);
     };
 
-    if (!note) return <main className="note-view"><div className="note-content-wrapper" style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100%'}}><p>Chọn một ghi chú để xem</p></div></main>;
+    if (!note) return <main className="note-view"><div className="note-content-wrapper" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><p>Chọn một ghi chú để xem</p></div></main>;
 
     return (
         <main className="note-view" id="noteView">
@@ -209,12 +202,6 @@ const handleKeyDown = (e) => {
                 </div>
             </div>
 
-<<<<<<< HEAD
-            <div className="note-content-wrapper">
-                <input className="note-title" placeholder="Tiêu đề..." value={title} onChange={(e) => setTitle(e.target.value)} onBlur={handleSave} />
-                <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} />
-                <SlashMenu isOpen={showSlashMenu} position={slashMenuPos} onSelect={handleSlashSelect} onClose={() => setShowSlashMenu(false)} />
-=======
             <div className="note-content-wrapper" style={{ position: 'relative' }}>
                 <input
                     id="noteTitle"
@@ -244,13 +231,12 @@ const handleKeyDown = (e) => {
                     noteContentRef={textareaRef}
                     onApplyResult={handleAIResult}
                 />
-
->>>>>>> main
                 <div
                     ref={textareaRef}
                     className="note-content"
                     contentEditable={true}
                     suppressContentEditableWarning={true}
+                    data-placeholder="Nội dung ghi chú"
                     onInput={handleContentChange}
                     onClick={handleClick}
                     onKeyDown={handleKeyDown}
