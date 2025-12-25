@@ -139,7 +139,7 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
                             top: `${rect.bottom - wrapperRect.top + 5}px`,
                             left: `${rect.left - wrapperRect.left}px`
                         });
-                    } catch (err) {
+                    } catch {
                         setSlashMenuPos({ top: '150px', left: '20px' });
                     }
                     return;
@@ -193,10 +193,11 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
             case 'h2': document.execCommand('formatBlock', false, 'H2'); break;
             case 'bullet': document.execCommand('insertUnorderedList'); break;
             case 'number': document.execCommand('insertOrderedList'); break;
-            case 'todo':
+            case 'todo': {
                 const checkboxHtml = '<div><input type="checkbox" style="margin-right: 5px;">&nbsp;</div>';
                 document.execCommand('insertHTML', false, checkboxHtml);
                 break;
+            }
             case 'separator': document.execCommand('insertHorizontalRule'); break;
             case 'image': fileInputRef.current.accept = "image/*"; fileInputRef.current.click(); break;
             case 'file': fileInputRef.current.accept = "*/*"; fileInputRef.current.click(); break;
@@ -265,7 +266,7 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
                         onClick={handleClick}
                         onKeyDown={handleKeyDown}
                         onBlur={handleSave}
-                        style={{ outline: 'none', minHeight: '300px' }}
+                        style={{ outline: 'none', minHeight: '300px', marginTop: '-20px' }}
                     ></div>
                 </div>
             </div>

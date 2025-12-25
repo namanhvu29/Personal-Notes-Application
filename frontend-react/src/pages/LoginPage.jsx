@@ -18,7 +18,11 @@ const LoginPage = () => {
         // TODO: Implement API call
         console.log('Login:', loginData);
         // Mock success
-        navigate('/dashboard');
+        if (loginData.username === 'admin') {
+            navigate('/admin');
+        } else {
+            navigate('/dashboard');
+        }
     };
 
     const handleForgotSubmit = (e) => {

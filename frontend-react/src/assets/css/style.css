@@ -361,7 +361,6 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-
   max-width: 700px;
   /* Chiều rộng tối đa mong muốn (có thể điều chỉnh) */
   margin: 0 auto;
@@ -702,6 +701,8 @@ body {
   /* Khoảng cách với nội dung */
   box-sizing: border-box;
   /* Đảm bảo padding không làm tràn width */
+  position: relative;
+  z-index: 10;
 }
 
 .note-title::placeholder {
@@ -724,6 +725,8 @@ body {
   /* Reset padding nếu có từ trước */
   box-sizing: border-box;
   /* Đảm bảo padding không làm tràn width */
+  position: relative;
+  top: -230px;
 }
 
 .note-content:empty::before {
