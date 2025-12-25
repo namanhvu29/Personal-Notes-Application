@@ -47,23 +47,6 @@ const LoginPage = () => {
 
     const handleLoginSubmit = async (e) => {
         e.preventDefault();
-
-        // Mock Login Logic
-        const { username, password } = loginData;
-
-        // Check for Admin
-        if ((username === 'admin1' || username === 'admin2' || username === 'admin3') && password === '123') {
-            console.log('Logged in as Admin');
-            localStorage.setItem('userRole', 'ADMIN');
-            localStorage.setItem('username', username);
-            navigate('/admin');
-        } else {
-            // Default to User for any other input (Mock)
-            console.log('Logged in as User');
-            localStorage.setItem('userRole', 'USER');
-            localStorage.setItem('username', username);
-            navigate('/dashboard');
-        }
         setIsLoading(true);
         setMessage({ text: 'Đang đăng nhập...', type: 'info' });
 
@@ -99,20 +82,28 @@ const LoginPage = () => {
                 localStorage.setItem('token', result.token);
             }
 
+            // Lưu role vào localStorage (quan trọng cho việc kiểm tra quyền)
+            const userRole = result.role || 'USER';
+            localStorage.setItem('userRole', userRole);
+            localStorage.setItem('username', result.username);
+
             localStorage.setItem('currentUser', JSON.stringify({
                 user_id: result.user_id,
                 username: result.username,
                 email: result.email,
-                role: result.role || 'USER'
+                role: userRole
             }));
 
             console.log('✅ Đăng nhập thành công!', result);
-
             setMessage({ text: result.message || 'Đăng nhập thành công!', type: 'success' });
 
-            // Navigate to dashboard instead of /
+            // Redirect based on user role
             setTimeout(() => {
-                navigate('/dashboard');
+                if (userRole === 'ADMIN') {
+                    navigate('/admin');
+                } else {
+                    navigate('/dashboard');
+                }
             }, 1000);
 
         } catch (error) {

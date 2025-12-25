@@ -120,6 +120,8 @@ const DashboardPage = () => {
                 onLogout={() => {
                     localStorage.removeItem('token');
                     localStorage.removeItem('currentUser');
+                    localStorage.removeItem('userRole');
+                    localStorage.removeItem('username');
                     navigate('/login');
                 }}
                 onOpenTrash={() => setIsTrashOpen(true)}
