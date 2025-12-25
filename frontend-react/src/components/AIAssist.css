@@ -15,10 +15,11 @@
     color: white !important;
 
     /* Sticky positioning */
-    top: 0;
+    top: 30px;
     align-self: flex-start;
     margin-left: -45px;
     margin-bottom: -28px;
+    margin-top: 30px;
     /* Prevent taking up vertical space */
     border: none;
     padding: 0;
