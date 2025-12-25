@@ -702,6 +702,8 @@ body {
   /* Khoảng cách với nội dung */
   box-sizing: border-box;
   /* Đảm bảo padding không làm tràn width */
+  position: relative;
+  z-index: 10;
 }
 
 .note-title::placeholder {
