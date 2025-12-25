@@ -17,6 +17,11 @@ const ProtectedRoute = ({ children, role }) => {
     if (role === 'ADMIN' && userRole !== 'ADMIN') {
       return <Navigate to="/dashboard" replace />;
     }
+  }
+
+  return children;
+};
+
 // Component kiểm tra đăng nhập
 const PrivateRoute = ({ children }) => {
   const currentUser = localStorage.getItem('currentUser');

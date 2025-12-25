@@ -63,6 +63,7 @@ const LoginPage = () => {
             localStorage.setItem('userRole', 'USER');
             localStorage.setItem('username', username);
             navigate('/dashboard');
+        }
         setIsLoading(true);
         setMessage({ text: 'Đang đăng nhập...', type: 'info' });
 
