@@ -9,8 +9,8 @@ body {
   font-family: system-ui, sans-serif;
   background-color: #f8faff;
   /* Thay cho #fffdf5 */
-  margin: 0;
-  padding: 0;
+  /* margin: 0;
+  padding: 0; */
 }
 
 .container {
@@ -696,9 +696,9 @@ body {
   border: none;
   outline: none;
   background: transparent;
-  padding: 10px 0;
+  padding: 10px 0 0 0;
   /* Padding trên dưới cho tiêu đề */
-  margin-bottom: 20px;
+  margin-bottom: 0;
   /* Khoảng cách với nội dung */
   box-sizing: border-box;
   /* Đảm bảo padding không làm tràn width */
@@ -722,6 +722,7 @@ body {
   /* Giãn dòng thoải mái */
   padding: 0;
   /* Reset padding nếu có từ trước */
+  margin-top: -130px;
   box-sizing: border-box;
   /* Đảm bảo padding không làm tràn width */
 }

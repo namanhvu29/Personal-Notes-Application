@@ -250,23 +250,25 @@ const NoteView = ({ note, onUpdateNote, onDeleteNote, categories, onAddNoteToCat
                         onClose={() => setShowSlashMenu(false)}
                     />
 
-                    {/* AI Assist Component - positioned outside content area */}
-                    <AIAssist
-                        noteContentRef={textareaRef}
-                        onApplyResult={handleAIResult}
-                    />
-                    <div
-                        ref={textareaRef}
-                        className="note-content"
-                        contentEditable={true}
-                        suppressContentEditableWarning={true}
-                        data-placeholder="Nội dung ghi chú"
-                        onInput={handleContentChange}
-                        onClick={handleClick}
-                        onKeyDown={handleKeyDown}
-                        onBlur={handleSave}
-                        style={{ outline: 'none', minHeight: '300px' }}
-                    ></div>
+                    <div style={{ position: 'relative' }}>
+                        {/* AI Assist Component - positioned outside content area */}
+                        <AIAssist
+                            noteContentRef={textareaRef}
+                            onApplyResult={handleAIResult}
+                        />
+                        <div
+                            ref={textareaRef}
+                            className="note-content"
+                            contentEditable={true}
+                            suppressContentEditableWarning={true}
+                            data-placeholder="Nội dung ghi chú"
+                            onInput={handleContentChange}
+                            onClick={handleClick}
+                            onKeyDown={handleKeyDown}
+                            onBlur={handleSave}
+                            style={{ outline: 'none', minHeight: '300px' }}
+                        ></div>
+                    </div>
                 </div>
             </div>
 
