@@ -724,7 +724,7 @@ body {
   /* Giãn dòng thoải mái */
   padding: 0;
   /* Reset padding nếu có từ trước */
-  margin-top: -130px;
+  margin-top: -165px;
   box-sizing: border-box;
   /* Đảm bảo padding không làm tràn width */
 }
